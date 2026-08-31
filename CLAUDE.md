@@ -11,4 +11,5 @@
 - スキルは `.claude/skills/<name>/SKILL.md`（`/update-todo` など）。中身は `docs/skills/<name>.md` を読ませる薄い入口であり、手順の正本は `docs/skills/` 側です。
 - サブエージェントは `.claude/agents/<name>.md`。こちらも `docs/skills/<name>.md` を読ませる薄い入口です。
 - 権限設定は `.claude/settings.json`。ただし**ポリシーの正本は `docs/agent_permissions.md`**（Codex / Copilot と共有）。許可・禁止コマンドを変えるときはまずそちらを直し、`.claude/settings.json` / `.vscode/settings.json` / `.codex/rules/project.rules` の 3 つへ反映してください（`.codex/config.toml` はサンドボックス / 承認ポリシーのみ）。
+- **ユーザーへの出力はすべて日本語で書く。** チャットの回答本文だけでなく、ターミナルのログに出るもの（ツール呼び出しの説明文、チャプター名、コミットメッセージ、選択肢の文言）も日本語にする。
 - （Claude 固有の注意が出たらここに追記）
