@@ -1,0 +1,5 @@
+{
+  // このリポジトリを開いたときに VSCode が推奨として案内する拡張機能。
+  // インストールは任意。プロジェクトのスタックに合わせて増減させる。
+  "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+}

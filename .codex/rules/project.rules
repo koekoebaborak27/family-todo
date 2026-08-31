@@ -1,0 +1,57 @@
+# エージェント権限ポリシーの Codex 実装（execpolicy ルール）。
+# 正本は docs/agent_permissions.md。内容を変えるときはまずそちらを直すこと。
+#
+# 読み込み先: <repo>/.codex/rules/*.rules（プロジェクト）と ~/.codex/rules/*.rules（ユーザー）。
+#   - .codex/config.toml と違い、プロジェクトを trusted 承認していなくても読み込まれる。
+#   - 構文エラーがあると Codex は起動時に "Error loading rules" で停止するため、
+#     効いているかどうかは起動できるか否かで確認できる。
+#
+# 文法:
+#   prefix_rule(pattern=[...], decision="allow" | "prompt" | "forbidden")
+#   - pattern はコマンドの先頭トークン列（前方一致）。"deny" は無効値（構文エラー）。
+#   - 要素にリストを書くと「そのいずれか」を意味する（例: ["status", "diff"]）。
+#   - allow = 確認なしでサンドボックス外実行を許可 / prompt = 常に確認 / forbidden = 実行拒否。
+
+# ---- 許可（確認なしで実行してよい） ----
+
+prefix_rule(pattern=["pnpm", "install"], decision="allow")
+prefix_rule(
+    pattern=["pnpm", ["lint", "format:check", "typecheck", "test"]],
+    decision="allow",
+)
+
+prefix_rule(pattern=["git", ["status", "diff", "log", "show", "branch"]], decision="allow")
+
+# フレームワークを導入したら次の行を有効にする（build を許可する）。
+# prefix_rule(pattern=["pnpm", "build"], decision="allow")
+
+# Prisma を採用する場合は次の行を有効にする。
+# prefix_rule(pattern=["pnpm", "prisma:generate"], decision="allow")
+
+# ローカル DB を Docker で動かす場合は次の 2 つを有効にする（Windows の区切り文字用に 2 行必要）。
+# prefix_rule(
+#     pattern=["docker", "compose", "-f", "docker/docker-compose.yml", ["up", "ps", "logs"]],
+#     decision="allow",
+# )
+# prefix_rule(
+#     pattern=["docker", "compose", "-f", "docker\docker-compose.yml", ["up", "ps", "logs"]],
+#     decision="allow",
+# )
+
+# ---- 禁止（エージェントが単独で実行してはならない） ----
+
+prefix_rule(pattern=["pnpm", "db:reset"], decision="forbidden")
+
+prefix_rule(pattern=["prisma", "migrate", "reset"], decision="forbidden")
+prefix_rule(pattern=["npx", "prisma", "migrate", "reset"], decision="forbidden")
+prefix_rule(pattern=["pnpm", ["exec", "dlx"], "prisma", "migrate", "reset"], decision="forbidden")
+
+prefix_rule(pattern=["git", "push", ["--force", "--force-with-lease", "-f"]], decision="forbidden")
+prefix_rule(pattern=["git", "reset", "--hard"], decision="forbidden")
+
+# .env の読み取り。execpolicy はシェルコマンドしか見ないため、これはベストエフォート。
+# 限界は docs/agent_permissions.md の「注意点」を参照。
+prefix_rule(
+    pattern=[["cat", "type", "more", "head", "tail", "Get-Content", "gc"], ".env"],
+    decision="forbidden",
+)

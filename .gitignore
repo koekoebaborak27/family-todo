@@ -1,0 +1,55 @@
+# === Dependencies ===
+node_modules/
+.pnpm-store/
+
+# === Build output ===
+dist/
+build/
+out/
+
+# === Environment files ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# === Debug / Log files ===
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+
+# === AI tools ===
+.gemini/
+.claude/settings.local.json
+
+# === IDE ===
+.idea/
+.obsidian/
+# .vscode は原則除外するが、推奨拡張機能と Copilot の権限ポリシーは
+# 「このプロジェクトの動かし方」であってフォント等の個人設定ではないため、リポジトリで共有する
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Testing ===
+coverage/
+test-results/
+playwright-report/
+
+# === 単体テストのエビデンス（playwright-evidence-test スキルの出力） ===
+# 画面のスクリーンショットや DB のダンプが入るため、リポジトリには含めない。
+# 共有が必要なら別のストレージに置き、docs/test/unit/result/README.md からリンクする。
+docs/test/unit/result/*
+!docs/test/unit/result/README.md
+
+# === TypeScript ===
+*.tsbuildinfo

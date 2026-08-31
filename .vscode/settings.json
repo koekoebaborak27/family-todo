@@ -1,0 +1,27 @@
+{
+  // GitHub Copilot（Agent モード）のターミナル自動承認ポリシー。
+  // 正本は docs/agent_permissions.md。内容を変えるときはまずそちらを直すこと。
+  // true  = 確認なしで実行、false = 常に手動承認（.claude/settings.json の allow / deny に対応）
+  "chat.tools.terminal.autoApprove": {
+    // --- 許可 ---
+    "/^pnpm (install|lint|format:check|typecheck)\b/": true,
+    "/^pnpm test(:[\w:-]+)?\b/": true,
+    "/^git (status|diff|log|show|branch)\b/": true,
+
+    // フレームワークを導入したら次の行を有効にする（build を許可する）。
+    // "/^pnpm build\b/": true,
+    // ローカル DB を Docker で動かす場合は次の行を有効にする。
+    // "/^docker compose -f docker\/docker-compose\.yml (up|ps|logs)\b/": true,
+    // Prisma を採用する場合は次の行を有効にする。
+    // "/^pnpm prisma:generate\b/": true,
+
+    // --- 禁止（必ず人間の確認を挟む） ---
+    "/^pnpm db:reset\b/": false,
+    "/prisma migrate reset\b/": false,
+    "/git push\b.*(--force|-f)\b/": false,
+    "/git reset\b.*--hard\b/": false,
+    // .env の中身をターミナル経由で読み出す操作（cat / type / Get-Content など）。
+    // .env.example は共有してよいので除外する。
+    "/(^|[\s\/\\])\.env(?!\.example)(\.|$|\s)/": false
+  }
+}

@@ -1,0 +1,80 @@
+name: CI
+
+# paths-ignore: ドキュメントだけの変更では CI を起動しない。
+# 変更ファイルが「すべて」パターンに一致する場合にのみスキップされるため、
+# 1 ファイルでもコードが混ざれば通常どおり全ステップが実行される。
+# （このファイル自体は対象外なので、ci.yml の変更は必ず CI で検証される）
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # DB を使うプロジェクトでは、次のブロックを有効にしてテスト用の DB を起動する。
+    # services:
+    #   postgres:
+    #     image: postgres:16
+    #     env:
+    #       POSTGRES_USER: app
+    #       POSTGRES_PASSWORD: password
+    #       POSTGRES_DB: app_db
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd "pg_isready -U app -d app_db"
+    #       --health-interval 5s
+    #       --health-timeout 5s
+    #       --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # pnpm は setup-node より先に入れる（setup-node の cache: pnpm が
+      # pnpm store path を実行するため、pnpm が PATH にある必要がある）。
+      # バージョンは package.json の packageManager フィールドから解決される。
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      # Prisma を採用する場合は、型を参照する Typecheck / Test より前に Client を生成する。
+      # （pnpm ストアがキャッシュヒットすると @prisma/client の postinstall が走らず、
+      #   生成前に tsc すると型解決に失敗する）
+      # - name: Prisma validate
+      #   run: pnpm exec prisma validate
+      # - name: Prisma generate
+      #   run: pnpm exec prisma generate
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # DB を使う場合は、0 からスキーマを再現できることをここで検証する。
+      # - name: Apply migrations
+      #   run: pnpm exec prisma migrate deploy
+
+      - name: Test
+        run: pnpm test
+
+      # フレームワークを導入して package.json に build を追加したら、次を有効にする。
+      # - name: Build
+      #   run: pnpm build

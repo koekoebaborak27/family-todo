@@ -1,0 +1,19 @@
+# Codex CLI のプロジェクト設定。
+# 権限ポリシーの正本は docs/agent_permissions.md。内容を変えるときはまずそちらを直すこと。
+#
+# 注意: Codex はこのファイルを「プロジェクトを trusted として承認した場合のみ」読み込む。
+#       初回起動時の信頼確認で承認していないと、以下の設定は反映されない。
+#
+# 補足: コマンド単位の allow / forbidden は .codex/rules/project.rules（execpolicy）側で定義する。
+#       こちらは trusted 承認に依存せず読み込まれるため、禁止コマンドの強制はそちらが担う。
+#       このファイルはサンドボックスと承認ポリシーによる「面」の制御のみを持つ。
+
+# ワークスペース外への書き込みはサンドボックスで遮断する。
+sandbox_mode = "workspace-write"
+
+# サンドボックス外へ出る操作（= 上記の破壊的コマンド類が該当しやすい）では必ず確認を求める。
+approval_policy = "on-request"
+
+[sandbox_workspace_write]
+# pnpm install を許可コマンドに含めているためネットワークは有効にする。
+network_access = true
