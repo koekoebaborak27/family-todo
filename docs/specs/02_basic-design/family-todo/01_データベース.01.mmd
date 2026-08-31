@@ -13,6 +13,7 @@ erDiagram
   USERS ||--o{ COMMENTS : "投稿する"
   USERS ||--o{ NOTIFICATION_SETTINGS : "設定する"
   USERS ||--o{ PUSH_SUBSCRIPTIONS : "登録する"
+  USERS ||--o{ SESSIONS : "ログインする"
 
   FAMILIES {
     int id PK
@@ -56,6 +57,8 @@ erDiagram
     int created_by_user_id FK
     int completed_by_user_id FK "nullable"
     datetime completed_at "nullable"
+    datetime due_soon_notified_at "nullable"
+    datetime overdue_notified_at "nullable"
     datetime created_at
     datetime updated_at
   }
@@ -88,5 +91,11 @@ erDiagram
     string endpoint
     string p256dh
     string auth
+    datetime created_at
+  }
+  SESSIONS {
+    string id PK "Cookieに保存する値"
+    int user_id FK
+    datetime expires_at "アクセスごとに90日後へ延長"
     datetime created_at
   }
