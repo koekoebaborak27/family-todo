@@ -18,6 +18,7 @@ erDiagram
     int id PK
     string name
     string invite_code
+    datetime invite_code_expires_at
     int created_by_user_id FK
     datetime created_at
   }
@@ -26,6 +27,7 @@ erDiagram
     string google_sub
     string email
     string display_name
+    string default_due_time "既定 20:00"
     int family_id FK "nullable"
     datetime created_at
   }
