@@ -1,6 +1,7 @@
-# <PROJECT_NAME> — エージェント向け方針（正本）
+# 家族 de TODO！ — エージェント向け方針（正本）
 
-<PROJECT_SUMMARY: このプロジェクトが何をするものかを 2〜3 行で書く>
+家族間で日常のちょっとしたToDo（買い物・ゴミ出し・提出物確認・予約など）を共有・管理するスマートフォン向けPWA。
+Next.js（Frontend）と Express（Backend・REST API）を分離し、Cloudflare D1 にデータを保存する。認証は Googleログイン、通知は Web Push。
 
 本ファイルは Claude Code / Codex / GitHub Copilot すべてが読む**正本**。詳細は各サブディレクトリの AGENTS.md・`DESIGN.md`・`REVIEW.md` に委譲し、ここは薄く保つ。
 
@@ -39,13 +40,11 @@
 
 ## ポイント
 
-> ここは**プロジェクトごとに書き換える節**。決まっていないうちは「未定」と書いておき、決まった時点で 1 行足す。
-
-- **技術スタック**: 言語 = TypeScript / Node.js（`.nvmrc` のバージョン）、パッケージマネージャ = pnpm、テスト = Vitest（単体）+ Playwright（画面）。フロントエンド = `<FRONTEND>`、バックエンド = `<BACKEND>`、DB = `<DATABASE>`。
+- **技術スタック**: 言語 = TypeScript / Node.js（`.nvmrc` のバージョン）、パッケージマネージャ = pnpm、テスト = Vitest（単体）+ Playwright（画面）。フロントエンド = Next.js（PWA）、バックエンド = Express（REST API）、DB = Cloudflare D1。
 - **アーキテクチャ**: 依存方向は `app → modules → shared` の一方向のみ。詳細 → `@src/AGENTS.md`
-- **CI は GitHub Actions**（lint / format / typecheck / test）。デプロイ先は `<DEPLOY_TARGET>`。
-- **ローカル開発の起動方法**をここに 1〜2 行で書く（例: `pnpm install` の後に `pnpm dev`。DB を使う場合は先に起動する）。
-- 認証・認可の方式が決まったらここに 1 行足す。
+- **CI は GitHub Actions**（lint / format / typecheck / test）。デプロイ先は Cloudflare（Frontend/Backendの具体構成は基本設計で確定。現時点ではBackendはCloudflare Workers上でExpressを動かす方式が第一候補）。
+- **ローカル開発の起動方法**: 未定（コード未着手。基本設計・開発環境構築時に確定する）。
+- **認証**: Googleログイン（OAuth）のみ。アプリ独自パスワードは持たない。権限はグループ内一律（家族グループ削除のみ作成者限定の例外）。
 
 ## 最小規約
 

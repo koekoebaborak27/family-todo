@@ -45,6 +45,22 @@
 
 > 使い方: `bg-primary text-primary-foreground`。`bg-[#xxxxxx]` は禁止。色味を変えたいときは JSX を個別上書きせず globals.css のトークンを編集し、全体へ反映する。
 
+> **暫定の具体値（コード未着手のため一時的にここへ記載）**
+> `src/app/globals.css` を作成したら、この暫定値を `@theme` の CSS 変数へ移し、このブロックは削除する。トンマナ: 家庭的でかわいらしい・柔らかい雰囲気。
+>
+> | トークン | Light（暫定値） | 備考 |
+> | --- | --- | --- |
+> | `background` | `#FDF8F0`（クリーム/アイボリー寄りのオフホワイト） | slate/stoneではなく暖色系オフホワイトを採用 |
+> | `foreground` | `#4A3F2C` | 背景に対して十分なコントラストを持つ暖色系の濃い茶 |
+> | `card` | `#FFFFFF` | `card-foreground` は `foreground` と同じ |
+> | `border` / `input` | `#F0E4D0` | 暖色系の淡いベージュ境界線 |
+> | `muted` | `#F5ECDD` | `muted-foreground` は `#8A7550` |
+> | `primary` | `#E8734A`（珊瑚・コーラル） | `primary-foreground` は `#FFFFFF` |
+> | `accent` | `#FCE3D6`（珊瑚の淡色） | `accent-foreground` は `#8A3D1F` |
+> | `destructive` | shadcn既定の赤系を維持 | 暫定調整不要（危険色は視認性優先でトンマナより既定値を優先） |
+>
+> Dark モードは暖色系の濃い茶〜チャコール（例: `background` は `#2A2420` 相当、`card` は `#332B24` 相当）を軸にし、`primary` のコーラルはやや明るめにしてコントラストを確保する。具体値はコード実装時（globals.css 作成時）に調整して確定する。
+
 ### タイポグラフィ
 | 用途 | クラス（例） |
 | --- | --- |
@@ -53,14 +69,14 @@
 | 本文 | `text-sm leading-relaxed` / `text-base` |
 | 補助 | `text-sm text-muted-foreground` |
 
-フォント: `next/font` で `src/app/layout.tsx` に読み込む（font-family の値は実装側で管理し、ここには書かない）。
+フォント: `next/font/google` で `src/app/layout.tsx` に読み込む。**書体は丸ゴシック系「M PLUS Rounded 1c」を見出し・本文共通の基本フォントとする**（家庭的でかわいらしいトンマナに合わせた決定）。太さは本文 500、見出し 700 を目安にする。
 
 ### 間隔（Spacing）
 - 4px グリッド（Tailwind 標準スケール）に従う。任意値で隙間を作らない。
 - セクション間・カード内の余白も標準スケールから選ぶ（具体値は実装裁量。同種の画面では揃える）。
 
 ### 角丸・影・境界
-- 角丸: `rounded-lg` を既定（`--radius` に連動。変更は globals.css 側で）。
+- 角丸: **`--radius` を 16px 相当（Tailwind の `rounded-2xl` に相当する値）に変更**し、カード・ボタン等の既定とする。控えめすぎず・pill形状ほど強すぎない「中くらい」の丸みをトンマナとして採用。
 - 影: 多用しない。必要時は標準ユーティリティ（`shadow-sm` 等）から選び、任意値は作らない。
 - 境界: `border border-border`。
 

@@ -1,0 +1,90 @@
+%%{init: {'theme':'default','themeVariables':{'fontFamily':"'Noto Sans CJK JP', sans-serif"}}}%%
+erDiagram
+  FAMILIES ||--o{ USERS : "所属する"
+  FAMILIES ||--o{ UNREGISTERED_MEMBERS : "抱える"
+  FAMILIES ||--o{ TODOS : "持つ"
+  CATEGORIES ||--o{ TODOS : "分類する"
+  USERS ||--o{ TODOS : "作成する"
+  USERS ||--o{ TODOS : "完了させる(nullable)"
+  TODOS ||--o{ TODO_ASSIGNEES : "担当者を持つ"
+  USERS ||--o{ TODO_ASSIGNEES : "担当する(nullable)"
+  UNREGISTERED_MEMBERS ||--o{ TODO_ASSIGNEES : "担当する(nullable)"
+  TODOS ||--o{ COMMENTS : "持つ"
+  USERS ||--o{ COMMENTS : "投稿する"
+  USERS ||--o{ NOTIFICATION_SETTINGS : "設定する"
+  USERS ||--o{ PUSH_SUBSCRIPTIONS : "登録する"
+
+  FAMILIES {
+    int id PK
+    string name
+    string invite_code
+    int created_by_user_id FK
+    datetime created_at
+  }
+  USERS {
+    int id PK
+    string google_sub
+    string email
+    string display_name
+    int family_id FK "nullable"
+    datetime created_at
+  }
+  UNREGISTERED_MEMBERS {
+    int id PK
+    int family_id FK
+    string name "family_id内で一意"
+    datetime created_at
+  }
+  CATEGORIES {
+    int id PK
+    string name "固定マスタ6件"
+  }
+  TODOS {
+    int id PK
+    int family_id FK
+    string title
+    text memo "nullable"
+    datetime due_at "nullable"
+    boolean due_has_time
+    enum priority "high/medium/low"
+    int category_id FK
+    enum status "incomplete/completed"
+    enum recurrence_type "none/daily/weekly/monthly"
+    json recurrence_config "nullable"
+    int created_by_user_id FK
+    int completed_by_user_id FK "nullable"
+    datetime completed_at "nullable"
+    datetime created_at
+    datetime updated_at
+  }
+  TODO_ASSIGNEES {
+    int id PK
+    int todo_id FK
+    int user_id FK "nullable・排他"
+    int unregistered_member_id FK "nullable・排他"
+    boolean is_follower
+  }
+  COMMENTS {
+    int id PK
+    int todo_id FK
+    int user_id FK
+    text body
+    datetime created_at
+    datetime updated_at
+  }
+  NOTIFICATION_SETTINGS {
+    int id PK
+    int user_id FK
+    enum notification_type "todo_added/assignee_set/due_soon/overdue"
+    boolean enabled
+    int remind_before_value "nullable・due_soon用"
+    enum remind_before_unit "hours/days・nullable"
+  }
+  PUSH_SUBSCRIPTIONS {
+    int id PK
+    int user_id FK
+    string endpoint
+    string p256dh
+    string auth
+    datetime created_at
+  }

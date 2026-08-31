@@ -1,0 +1,33 @@
+%%{init: {'theme':'default','themeVariables':{'fontFamily':"'Noto Sans CJK JP', sans-serif"},'flowchart':{'nodeSpacing':50,'rankSpacing':85,'padding':12}}}%%
+flowchart TB
+  login[ログイン画面]
+  group_entry[家族グループ作成・参加画面]
+  todo_list["ToDo一覧画面<br/>未完了/完了タブ"]
+  todo_edit[ToDo追加・編集画面]
+  todo_detail["ToDo詳細画面<br/>コメント含む"]
+  group_settings[家族グループ設定画面]
+  user_settings[個人設定画面]
+  ios_guide[iOSインストール案内]
+
+  login -->|未所属・初回ログイン| group_entry
+  login -->|所属グループあり| todo_list
+
+  group_entry -.->|iOS Safari かつ未インストール| ios_guide
+  ios_guide -.->|閉じる・後で| group_entry
+  todo_list -.->|iOS Safari かつ未インストール| ios_guide
+  ios_guide -.->|閉じる・後で| todo_list
+
+  group_entry -->|作成 or 参加が完了| todo_list
+
+  todo_list -->|＋ボタン| todo_edit
+  todo_list -->|項目をタップ| todo_detail
+  todo_edit -->|保存| todo_list
+  todo_detail -->|編集ボタン| todo_edit
+  todo_detail -->|戻る| todo_list
+
+  todo_list -->|ナビ: グループ設定| group_settings
+  todo_list -->|ナビ: 個人設定| user_settings
+  group_settings -->|戻る| todo_list
+  user_settings -->|戻る| todo_list
+
+  group_settings -->|グループ削除 or 自分が退出| group_entry
