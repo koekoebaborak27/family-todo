@@ -4,7 +4,7 @@
 
 | ファイル | 内容 |
 | --- | --- |
-| （まだ無い） | 分類が決まった時点で `<分類>.md` を作り、この表へ 1 行足す |
+| [`cloudflare-workers-検証.md`](cloudflare-workers-検証.md) | Cloudflare Workers 上での Express / Web Push（VAPID）/ Cron Triggers の技術検証で使ったコマンドと落とし穴 |
 
 ## 書き方
 
