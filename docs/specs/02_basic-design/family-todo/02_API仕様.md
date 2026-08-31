@@ -81,4 +81,4 @@ REST API。共通規約（ベースパス・認証・エラー形式）は [`00_
 
 ## 定期処理（バッチ）
 
-- 期限接近・期限超過の通知は、ユーザー操作に紐づくAPIではなく、Cloudflare Cron Triggers等による定期実行から`todos`・`notification_settings`を突き合わせて送信する想定。具体的な実行間隔・実装方式は基本設計の技術検証（`docs/specs/02_basic-design/README.md`のインフラ関連事項）で確定する。
+- 期限接近・期限超過の通知は、ユーザー操作に紐づくAPIではなく、Cloudflare Cron Triggers等による定期実行から`todos`・`notification_settings`を突き合わせて送信する想定。具体的な実行間隔・実装方式は基本設計の技術検証（[インフラ関連事項の技術検証](../README.md#インフラ関連事項の技術検証)）で確定する。

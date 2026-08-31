@@ -23,7 +23,7 @@
 | 区分 | 進捗 |
 | --- | --- |
 | 要件定義（未決事項の確定） | 8 / 8（完了） |
-| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計 完了、詳細設計以降 未着手 |
+| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計 完了、インフラ関連の技術検証3件と詳細設計以降 未着手 |
 
 ## 次にやること
 
@@ -38,7 +38,10 @@ git status --porcelain   # 未コミット差分がないか確認
 - [x] 2. 基本設計（画面遷移・API仕様・DBスキーマ概要）とデザイントークンを決定した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
 - [x] 3. 画面遷移図・ER図のSVGを生成し、レビュー指摘（改行・iOS案内の遷移漏れ）を修正した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面遷移図とer図のsvgを生成しレビュー指摘を修正)
 - [x] 4. 画面ごとの基本設計書8画面（`docs/specs/02_basic-design/family-todo/10_ログイン.md`〜`24_iOSインストール案内.md`）を作成した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面ごとの基本設計書8画面を作成)
-- [ ] 5. 画面・API・DBの詳細設計を行う
+- [ ] 5. Cloudflare Workers 上で Express が動くかを検証する → [検証1](../specs/02_basic-design/README.md#検証1-cloudflare-workers-上で-express-が動くか)
+- [ ] 6. Web Push（VAPID）のライブラリが Workers ランタイムで動くかを検証する → [検証2](../specs/02_basic-design/README.md#検証2-web-push-のライブラリが-workers-ランタイムで動くか)
+- [ ] 7. 期限接近・期限超過の通知を送る定期実行の間隔を決める → [検証3](../specs/02_basic-design/README.md#検証3-期限接近と期限超過の通知を送る定期実行の間隔をいくつにするか)
+- [ ] 8. 画面・API・DBの詳細設計を行う
 
 ## 残っているタスク
 
@@ -49,6 +52,9 @@ git status --porcelain   # 未コミット差分がないか確認
 - [x] 基本設計（画面遷移・API仕様・DBスキーマの概要）をまとめる（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
 - [x] 画面遷移図・ER図のSVGを生成する（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面遷移図とer図のsvgを生成しレビュー指摘を修正)
 - [x] 画面ごとの基本設計書8画面を作成する（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面ごとの基本設計書8画面を作成)
+- [ ] Cloudflare Workers 上で Express が動くかを検証する → [検証1](../specs/02_basic-design/README.md#検証1-cloudflare-workers-上で-express-が動くか)
+- [ ] Web Push（VAPID）のライブラリが Workers ランタイムで動くかを検証する → [検証2](../specs/02_basic-design/README.md#検証2-web-push-のライブラリが-workers-ランタイムで動くか)
+- [ ] 期限接近・期限超過の通知を送る定期実行の間隔を決める → [検証3](../specs/02_basic-design/README.md#検証3-期限接近と期限超過の通知を送る定期実行の間隔をいくつにするか)
 - [ ] 画面・API・DB設計（詳細設計）を行う
 - [ ] 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）
 - [ ] 実装する
@@ -67,7 +73,7 @@ git status --porcelain   # 未コミット差分がないか確認
 | ローカル環境 | 未構築（コードなし、ドキュメントのみ） |
 | 本番 | 未構築 |
 | 要件定義書 | 未決事項8件を含めて確定済み → [`docs/specs/01_requirements/family-todo/`](../specs/01_requirements/family-todo/README.md) |
-| 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み） → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |
+| 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み）。インフラ関連の技術検証3件は未実施 → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |
 | デザイントークン | 背景色（アイボリー系）・プライマリカラー（珊瑚）・フォント（M PLUS Rounded 1c）・角丸（16px相当）を暫定決定 → [`DESIGN.md`](../../DESIGN.md) |
 
 ## 完了済みの作業
