@@ -6,6 +6,7 @@ node_modules/
 dist/
 build/
 out/
+.next/
 
 # === Environment files ===
 .env
@@ -14,6 +15,15 @@ out/
 .env.test.local
 .env.production.local
 !.env.example
+!.env.local.example
+
+# wrangler dev（Cloudflare Workers のローカル実行）が読み込む環境変数ファイル。
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# wrangler のローカル実行キャッシュ（ローカル D1 の SQLite ファイル等）。
+.wrangler/
 
 # === Debug / Log files ===
 *.log
@@ -53,3 +63,7 @@ docs/test/unit/result/*
 
 # === TypeScript ===
 *.tsbuildinfo
+
+# === Next.js（apps/frontend） ===
+# next dev / next build のたびに自動生成される型定義ファイル。
+next-env.d.ts

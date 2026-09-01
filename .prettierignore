@@ -1,5 +1,8 @@
 node_modules/
 coverage/
+dist/
+.next/
+.wrangler/
 pnpm-lock.yaml
 *.md
 **/.claude/

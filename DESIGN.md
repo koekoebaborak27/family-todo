@@ -45,21 +45,7 @@
 
 > 使い方: `bg-primary text-primary-foreground`。`bg-[#xxxxxx]` は禁止。色味を変えたいときは JSX を個別上書きせず globals.css のトークンを編集し、全体へ反映する。
 
-> **暫定の具体値（コード未着手のため一時的にここへ記載）**
-> `src/app/globals.css` を作成したら、この暫定値を `@theme` の CSS 変数へ移し、このブロックは削除する。トンマナ: 家庭的でかわいらしい・柔らかい雰囲気。
->
-> | トークン | Light（暫定値） | 備考 |
-> | --- | --- | --- |
-> | `background` | `#FDF8F0`（クリーム/アイボリー寄りのオフホワイト） | slate/stoneではなく暖色系オフホワイトを採用 |
-> | `foreground` | `#4A3F2C` | 背景に対して十分なコントラストを持つ暖色系の濃い茶 |
-> | `card` | `#FFFFFF` | `card-foreground` は `foreground` と同じ |
-> | `border` / `input` | `#F0E4D0` | 暖色系の淡いベージュ境界線 |
-> | `muted` | `#F5ECDD` | `muted-foreground` は `#8A7550` |
-> | `primary` | `#E8734A`（珊瑚・コーラル） | `primary-foreground` は `#FFFFFF` |
-> | `accent` | `#FCE3D6`（珊瑚の淡色） | `accent-foreground` は `#8A3D1F` |
-> | `destructive` | shadcn既定の赤系を維持 | 暫定調整不要（危険色は視認性優先でトンマナより既定値を優先） |
->
-> Dark モードは暖色系の濃い茶〜チャコール（例: `background` は `#2A2420` 相当、`card` は `#332B24` 相当）を軸にし、`primary` のコーラルはやや明るめにしてコントラストを確保する。具体値はコード実装時（globals.css 作成時）に調整して確定する。
+> 具体値は `src/app/globals.css` の `@theme inline` / `:root` / `.dark` に定義済み（暖色系・家庭的でかわいらしいトンマナ）。`destructive` のみ shadcn 既定の赤系を維持している。
 
 ### タイポグラフィ
 | 用途 | クラス（例） |

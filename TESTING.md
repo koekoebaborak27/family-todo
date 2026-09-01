@@ -1,10 +1,10 @@
 # テスト方針 — 単体テスト
 
-本ファイルは**テスト作成時のガイド**。正本は `AGENTS.md`、配置の最低限は `src/AGENTS.md` にもサマリを置く。
+本ファイルは**テスト作成時のガイド**。正本は `AGENTS.md`、配置の最低限は `apps/frontend/AGENTS.md` / `apps/backend/AGENTS.md` にもサマリを置く。
 採用ツール・設定は `AGENTS.md` の「ポイント」節を参照。画面操作テスト（Playwright）は `docs/skills/playwright-evidence-test.md` が扱い、本ファイルは単体テストのみ扱う。
 
-- 単体: **Vitest**（`pnpm test` = `vitest run` / `pnpm test:watch` = watch）
-- 対象パターン: `src/**/*.{test,spec}.{ts,tsx}`（`vitest.config.ts`）
+- 単体: **Vitest**（`pnpm test` = 各ワークスペースの `vitest run` / `pnpm test:watch` = watch）
+- 対象パターン: 各ワークスペース（`apps/frontend/` `apps/backend/` `packages/shared/`）の `src/**/*.{test,spec}.{ts,tsx}`（各ディレクトリの `vitest.config.ts`）
 - CI: GitHub Actions（`.github/workflows/ci.yml`）で `pnpm test` が**必須ゲート**（手元のフックはその前倒しであり、CI の二重化ではない）
 
 ## 1. 配置 — コロケーション
@@ -22,10 +22,10 @@ lite-DDD はレイヤーで責務が違う。テストの優先度も変える�
 | `validation.ts`（Zod） | ★必須 | 境界値・必須/任意・異常入力の弾き。仕様が凝縮され費用対効果が高い | 純粋単体 |
 | 権限判定などの純粋関数 | ★必須 | 入力→出力の網羅 | 純粋単体 |
 | `actions.ts`（Server Action） | △要所のみ | 「認可→service呼び出し→結果整形」の**配線**確認。ロジックは service 側で済 | service モック |
-| `repository.ts`（DB アクセス） | △原則書かない | 複雑なクエリ・トランザクション境界のみ。単純 CRUD は書かない（ORM を信用） | DB 統合（後述） |
+| `repository.ts`（D1 アクセス） | △要所のみ | D1 は生SQL（ORM不採用）のため、複雑なクエリ・SQLの書き間違いが起きやすい箇所のみ書く。単純な1テーブルのCRUDは書かない | DB 統合（後述） |
 | `ui/` | ✕当面スキップ | E2E に委譲。単体では原則書かない | — |
 
-**観測性との整合**: 業務コードは `try/catch`・ログを書かず `throw new AppError(...)` のみ（`src/AGENTS.md`）。したがって —
+**観測性との整合**: 業務コードは `try/catch`・ログを書かず `throw new AppError(...)` のみ（`apps/frontend/AGENTS.md` / `apps/backend/AGENTS.md`）。したがって —
 - `service` のテストは「条件 → 正常戻り値 or AppError スロー」だけ見ればよい（副作用がなく書きやすい）。
 - ログ／エラー整形は入口ラッパー（`shared/observability`）のテストで**一度だけ**担保し、各 action で再テストしない。
 
@@ -57,9 +57,9 @@ describe("user/service", () => {
 テストは性質で2階層に割れる。混在させるとフックや手元実行が破綻する。
 
 - **純粋単体**（`rbac` / `service`(モック) / `validation` / `with-op`）= DB不要・高速 → 手元/フック向き
-- **DB統合**（`repository` の複雑クエリ等）= 要 PostgreSQL → 手元で DB 未起動だと必ず失敗
+- **DB統合**（`repository` の複雑クエリ等）= 要ローカル D1 → `wrangler d1 execute --local` 等でのローカルD1準備が要る
 
-→ DB 依存は `*.int.test.ts` など命名で分離し、**フック・手元の既定は純粋単体のみ**。DB 統合は CI と明示実行（`docker compose ... up -d db` 後）に委ねる。
+→ DB 依存は `*.int.test.ts` など命名で分離し、**フック・手元の既定は純粋単体のみ**。DB 統合は CI と明示実行に委ねる（具体的な起動コマンドは D1 のテスト方針を決める段階で確定する）。
 
 ## 5. フック化の指針
 
@@ -149,7 +149,7 @@ DBの状態で挙動が変わるテストは、**「検証したいのがロジ�
 | 検証対象 | DB状態の与え方 | 実DB | データの形 |
 |---|---|---|---|
 | `service` のロジック分岐（存在/不在/ロック/0件/閾値 等で挙動が変わる） | `repository` のモック戻り値で表現 | **不要** | 型付きファクトリ（DB不使用） |
-| `repository` の複雑クエリ（WHERE/JOIN/並び/ページング/トランザクション）が正しい行を返すか | 実DBに行を投入 | **必要**（`*.int.test.ts`、§4） | ORM で投入 → 後始末 |
+| `repository` の複雑クエリ（WHERE/JOIN/並び/ページング/トランザクション）が正しい行を返すか | 実DBに行を投入 | **必要**（`*.int.test.ts`、§4） | 生SQL（INSERT文）で投入 → 後始末 |
 
 ### 7.1 service 層 — 実DB不要。状態は「モック戻り値」で作る
 
@@ -188,7 +188,7 @@ describe("auth/service login", () => {
 クエリ自体の正しさはモックでは検証できないので、実DBに行を入れて確かめる（`*.int.test.ts`）。**テスト間の独立性**を必ず確保する。
 
 - 各テストの `beforeEach` で対象テーブルを truncate → 必要な行だけ投入、または**トランザクションで包んで毎回ロールバック**（速く漏れにくい）。
-- 投入は ORM で行い、**初期データ投入用の seed を流用しない**。seed はアプリ起動用。テストが seed の中身に依存すると壊れやすいので、テスト用データはテスト側で明示的に作る。
+- 投入は生SQLで行い、**初期データ投入用の seed を流用しない**。seed はアプリ起動用。テストが seed の中身に依存すると壊れやすいので、テスト用データはテスト側で明示的に作る。
 
 ### 7.3 原則
 
