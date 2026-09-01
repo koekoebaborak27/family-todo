@@ -13,6 +13,7 @@ export interface TodoRow {
   completed_at: string | null;
   completed_by_display_name: string | null;
   created_at: string;
+  created_by_display_name?: string;
 }
 
 // 家族グループ内のToDoを、完了状態・カテゴリで絞り込んで取得する。
@@ -80,13 +81,83 @@ export async function findTodoRow(
 ): Promise<(TodoRow & { family_id: number; recurrence_config: string | null }) | null> {
   const row = await getDb()
     .prepare(
-      `SELECT id, family_id, title, memo, due_at, due_has_time, priority, category_id, status,
-              recurrence_type, recurrence_config, completed_at, created_at
-       FROM todos WHERE id = ?`,
+      `SELECT t.id, t.family_id, t.title, t.memo, t.due_at, t.due_has_time, t.priority, t.category_id, t.status,
+              t.recurrence_type, t.recurrence_config, t.completed_at, t.created_at,
+              creator.display_name AS created_by_display_name,
+              completer.display_name AS completed_by_display_name
+       FROM todos t
+       JOIN users creator ON creator.id = t.created_by_user_id
+       LEFT JOIN users completer ON completer.id = t.completed_by_user_id
+       WHERE t.id = ?`,
     )
     .bind(todoId)
     .first<TodoRow & { family_id: number; recurrence_config: string | null }>();
   return row ?? null;
+}
+
+// ToDo詳細に表示するコメントを、投稿者名付きで古い順に取得する。
+export async function listCommentRows(todoId: number): Promise<CommentRow[]> {
+  const { results } = await getDb()
+    .prepare(
+      `SELECT c.id, c.body, c.created_at, c.updated_at, u.display_name AS user_display_name
+       FROM comments c JOIN users u ON u.id = c.user_id WHERE c.todo_id = ? ORDER BY c.created_at ASC`,
+    )
+    .bind(todoId)
+    .all<CommentRow>();
+  return results;
+}
+
+// コメント1件を追加する。表示内容は詳細を取り直して最新化する。
+export async function createCommentRow(
+  todoId: number,
+  userId: number,
+  body: string,
+): Promise<void> {
+  await getDb()
+    .prepare("INSERT INTO comments (todo_id, user_id, body) VALUES (?, ?, ?)")
+    .bind(todoId, userId, body)
+    .run();
+}
+
+// コメントの属する家族グループを調べ、別グループのコメントを操作できないようにする。
+export async function findCommentFamilyId(commentId: number): Promise<number | null> {
+  const row = await getDb()
+    .prepare("SELECT t.family_id FROM comments c JOIN todos t ON t.id = c.todo_id WHERE c.id = ?")
+    .bind(commentId)
+    .first<{ family_id: number }>();
+  return row?.family_id ?? null;
+}
+
+// コメント本文を更新する。
+export async function updateCommentRow(commentId: number, body: string): Promise<void> {
+  await getDb()
+    .prepare("UPDATE comments SET body = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+    .bind(body, commentId)
+    .run();
+}
+
+// コメントを物理削除する。
+export async function deleteCommentRow(commentId: number): Promise<void> {
+  await getDb().prepare("DELETE FROM comments WHERE id = ?").bind(commentId).run();
+}
+
+// ToDoと関連する担当者・コメントをまとめて物理削除する。
+export async function deleteTodoRows(todoId: number): Promise<void> {
+  const db = getDb();
+  await db.batch([
+    db.prepare("DELETE FROM comments WHERE todo_id = ?").bind(todoId),
+    db.prepare("DELETE FROM todo_assignees WHERE todo_id = ?").bind(todoId),
+    db.prepare("DELETE FROM todos WHERE id = ?").bind(todoId),
+  ]);
+}
+
+// commentsテーブルから取得する、詳細画面用のコメント行。
+export interface CommentRow {
+  id: number;
+  body: string;
+  user_display_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // ToDoを追加し、採番されたIDを返す。担当者は呼び出し側で続けて保存する。

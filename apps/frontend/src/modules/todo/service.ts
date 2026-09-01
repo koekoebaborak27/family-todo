@@ -1,4 +1,12 @@
-import type { SortField, SortOrder, SortTab, Todo, TodoPriority } from "./types";
+import type {
+  RecurrenceType,
+  SortField,
+  SortOrder,
+  SortTab,
+  Todo,
+  TodoDetail,
+  TodoPriority,
+} from "./types";
 
 // ToDo一覧画面に表示するエラー文言。
 // docs/specs/02_basic-design/family-todo/14_ToDo一覧.md「7. エラー時の表示文言」のとおり。
@@ -54,6 +62,21 @@ export function recurrenceLabel(recurrenceType: string): string | null {
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
+// 詳細画面向けに、繰り返す曜日または日付まで含めた文言を作る。
+export function recurrenceDetailLabel(todo: TodoDetail): string {
+  if (todo.recurrenceType === "none") return "なし";
+  if (todo.recurrenceType === "daily") return "毎日";
+  if (
+    todo.recurrenceType === "weekly" &&
+    todo.recurrenceConfig &&
+    "weekdays" in todo.recurrenceConfig
+  )
+    return `毎週 ${todo.recurrenceConfig.weekdays.map((day) => WEEKDAY_LABELS[day]).join("・")}`;
+  if (todo.recurrenceType === "monthly" && todo.recurrenceConfig && "day" in todo.recurrenceConfig)
+    return `毎月 ${todo.recurrenceConfig.day}日`;
+  return RECURRENCE_LABELS[todo.recurrenceType as RecurrenceType] ?? "なし";
+}
+
 // 期限を「9/3(水)」または時刻ありなら「9/3(水) 18:00」の形式にする。
 export function formatDueAt(dueAt: string, dueHasTime: boolean): string {
   const date = new Date(dueAt);
@@ -71,6 +94,20 @@ export function formatCompletedInfo(displayName: string, completedAt: string): s
   const date = new Date(completedAt);
   const datePart = `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]})`;
   return `${displayName} が ${datePart} に完了`;
+}
+
+// 作成者と作成日時の表示文言を作る。
+export function formatCreatedInfo(displayName: string, createdAt: string): string {
+  const date = new Date(createdAt);
+  return `${displayName} が ${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]}) に作成`;
+}
+
+// コメントの投稿日時を表示用に整える。
+export function formatCommentDate(dateTime: string): string {
+  const date = new Date(dateTime);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]}) ${hours}:${minutes}`;
 }
 
 // 未完了タブで、期限を過ぎたToDoかどうか。

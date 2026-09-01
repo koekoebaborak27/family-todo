@@ -2,13 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthenticatedUser } from "../auth";
 import {
   countCommentsForTodoIds,
+  createCommentRow,
+  deleteCommentRow,
+  deleteTodoRows,
+  findCommentFamilyId,
   findTodoFamilyId,
   listAssigneesForTodoIds,
   listTodoRows,
   markTodoCompleted,
   markTodoIncomplete,
 } from "./repository";
-import { completeTodo, incompleteTodo, listTodos } from "./service";
+import {
+  createComment,
+  deleteComment,
+  deleteTodo,
+  completeTodo,
+  incompleteTodo,
+  listTodos,
+} from "./service";
 
 /**
  * 対象: todo/service listTodos・completeTodo・incompleteTodo
@@ -23,6 +34,17 @@ vi.mock("./repository", () => ({
   findTodoFamilyId: vi.fn(),
   markTodoCompleted: vi.fn(),
   markTodoIncomplete: vi.fn(),
+  createCommentRow: vi.fn(),
+  deleteCommentRow: vi.fn(),
+  deleteTodoRows: vi.fn(),
+  findCommentFamilyId: vi.fn(),
+  findTodoRow: vi.fn(),
+  countValidAssignees: vi.fn(),
+  createTodoRow: vi.fn(),
+  replaceTodoAssignees: vi.fn(),
+  updateTodoRow: vi.fn(),
+  updateCommentRow: vi.fn(),
+  listCommentRows: vi.fn(),
 }));
 
 const unaffiliatedUser: AuthenticatedUser = { id: 1, familyId: null };
@@ -178,6 +200,32 @@ describe("todo/service incompleteTodo", () => {
       await incompleteTodo(1, affiliatedUser);
 
       expect(markTodoIncomplete).toHaveBeenCalledWith(1);
+    });
+  });
+});
+
+describe("todo/service コメントと削除", () => {
+  describe("コメントを追加するとき", () => {
+    it("自分のグループのToDoなら本文と投稿者を保存する", async () => {
+      vi.mocked(findTodoFamilyId).mockResolvedValue(10);
+      await createComment(1, { body: "確認しました" }, affiliatedUser);
+      expect(createCommentRow).toHaveBeenCalledWith(1, 2, "確認しました");
+    });
+  });
+
+  describe("コメントが他グループのものであるとき", () => {
+    it("AppError(NOT_FOUND) を投げ、削除しない", async () => {
+      vi.mocked(findCommentFamilyId).mockResolvedValue(999);
+      await expect(deleteComment(1, affiliatedUser)).rejects.toMatchObject({ code: "NOT_FOUND" });
+      expect(deleteCommentRow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("ToDoを削除するとき", () => {
+    it("自分のグループのToDoと関連データを削除する", async () => {
+      vi.mocked(findTodoFamilyId).mockResolvedValue(10);
+      await deleteTodo(1, affiliatedUser);
+      expect(deleteTodoRows).toHaveBeenCalledWith(1);
     });
   });
 });

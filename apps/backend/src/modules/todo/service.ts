@@ -4,15 +4,21 @@ import type { AuthenticatedUser } from "../auth";
 import {
   countCommentsForTodoIds,
   countValidAssignees,
+  createCommentRow,
   createTodoRow,
+  deleteCommentRow,
+  deleteTodoRows,
+  findCommentFamilyId,
   findTodoRow,
   findTodoFamilyId,
   listAssigneesForTodoIds,
+  listCommentRows,
   listTodoRows,
   markTodoCompleted,
   markTodoIncomplete,
   replaceTodoAssignees,
   updateTodoRow,
+  updateCommentRow,
 } from "./repository";
 import type { TodoAssigneeSummary, TodoDetail, TodoSummary } from "./types";
 import type {
@@ -20,6 +26,7 @@ import type {
   ListTodosQuery,
   ReplaceAssigneesInput,
   UpdateTodoInput,
+  CommentInput,
 } from "./validation";
 
 // ToDo一覧を取得し、担当者・コメント件数を組み立てて返す。
@@ -150,7 +157,10 @@ export async function getTodo(todoId: number, user: AuthenticatedUser): Promise<
   if (!row || row.family_id !== familyId) {
     throw Errors.NOT_FOUND("このToDoは削除されています。");
   }
-  const assignees = await listAssigneesForTodoIds([todoId]);
+  const [assignees, comments] = await Promise.all([
+    listAssigneesForTodoIds([todoId]),
+    listCommentRows(todoId),
+  ]);
   return {
     id: row.id,
     title: row.title,
@@ -170,6 +180,18 @@ export async function getTodo(todoId: number, user: AuthenticatedUser): Promise<
       id: (assignee.user_id ?? assignee.unregistered_member_id) as number,
       displayName: assignee.user_display_name ?? assignee.unregistered_name ?? "",
       isFollower: assignee.is_follower === 1,
+    })),
+    commentCount: comments.length,
+    completedByDisplayName: row.completed_by_display_name,
+    completedAt: row.completed_at,
+    createdAt: row.created_at,
+    createdByDisplayName: row.created_by_display_name ?? "",
+    comments: comments.map((comment) => ({
+      id: comment.id,
+      body: comment.body,
+      userDisplayName: comment.user_display_name,
+      createdAt: comment.created_at,
+      updatedAt: comment.updated_at,
     })),
   };
 }
@@ -218,4 +240,47 @@ export async function incompleteTodo(todoId: number, user: AuthenticatedUser): P
   const familyId = ensureFamilyMembership(user);
   await ensureTodoInMyFamily(todoId, familyId);
   await markTodoIncomplete(todoId);
+}
+
+// ToDoを削除する。関連するコメントと担当者も一緒に削除する。
+export async function deleteTodo(todoId: number, user: AuthenticatedUser): Promise<void> {
+  const familyId = ensureFamilyMembership(user);
+  await ensureTodoInMyFamily(todoId, familyId);
+  await deleteTodoRows(todoId);
+}
+
+// ToDoにコメントを追加する。
+export async function createComment(
+  todoId: number,
+  input: CommentInput,
+  user: AuthenticatedUser,
+): Promise<void> {
+  const familyId = ensureFamilyMembership(user);
+  await ensureTodoInMyFamily(todoId, familyId);
+  await createCommentRow(todoId, user.id, input.body);
+}
+
+// コメントの属する家族を確認する。存在しない・別グループなら同じ404を返す。
+async function ensureCommentInMyFamily(commentId: number, familyId: number): Promise<void> {
+  if ((await findCommentFamilyId(commentId)) !== familyId) {
+    throw Errors.NOT_FOUND("このコメントは削除されています。");
+  }
+}
+
+// コメント本文を更新する。グループ内のメンバー全員が操作できる。
+export async function updateComment(
+  commentId: number,
+  input: CommentInput,
+  user: AuthenticatedUser,
+): Promise<void> {
+  const familyId = ensureFamilyMembership(user);
+  await ensureCommentInMyFamily(commentId, familyId);
+  await updateCommentRow(commentId, input.body);
+}
+
+// コメントを削除する。グループ内のメンバー全員が操作できる。
+export async function deleteComment(commentId: number, user: AuthenticatedUser): Promise<void> {
+  const familyId = ensureFamilyMembership(user);
+  await ensureCommentInMyFamily(commentId, familyId);
+  await deleteCommentRow(commentId);
 }

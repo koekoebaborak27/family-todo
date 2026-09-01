@@ -88,6 +88,15 @@ export const replaceAssigneesSchema = z
   })
   .superRefine(validateAssignees);
 
+// コメントの投稿・編集で受け取る本文を検証する。
+export const commentSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "コメントを入力してください。")
+    .max(500, "コメントは500文字以内で入力してください。"),
+});
+
 // 非登録メンバーを担当者にするときは、通知を受ける登録ユーザーを必須にする。
 function validateAssignees(
   input: { unregisteredMemberIds: number[]; followerUserIds: number[] },
@@ -106,3 +115,4 @@ function validateAssignees(
 export type CreateTodoInput = z.infer<typeof createTodoSchema>;
 export type UpdateTodoInput = z.infer<typeof updateTodoSchema>;
 export type ReplaceAssigneesInput = z.infer<typeof replaceAssigneesSchema>;
+export type CommentInput = z.infer<typeof commentSchema>;

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createTodoSchema, listTodosQuerySchema, replaceAssigneesSchema } from "./validation";
+import {
+  commentSchema,
+  createTodoSchema,
+  listTodosQuerySchema,
+  replaceAssigneesSchema,
+} from "./validation";
 
 /**
  * 対象: todo/validation listTodosQuerySchema
@@ -119,6 +124,26 @@ describe("todo/validation createTodoSchema", () => {
         expect(result.error.issues[0]?.message).toBe(
           "ログインしないメンバーを担当者にする場合は、通知を受け取る家族を1人以上選んでください。",
         );
+    });
+  });
+});
+
+describe("todo/validation commentSchema", () => {
+  describe("本文が空白だけのとき", () => {
+    it("コメントを入力するよう検証を弾く", () => {
+      const result = commentSchema.safeParse({ body: "  " });
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error.issues[0]?.message).toBe("コメントを入力してください。");
+    });
+  });
+
+  describe("本文が500文字を超えるとき", () => {
+    it("文字数上限を示して検証を弾く", () => {
+      const result = commentSchema.safeParse({ body: "あ".repeat(501) });
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error.issues[0]?.message).toBe("コメントは500文字以内で入力してください。");
     });
   });
 });
