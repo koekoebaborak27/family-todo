@@ -85,3 +85,104 @@ export async function findFamilyById(id: number): Promise<FamilyDetailRow | null
     .first<FamilyDetailRow>();
   return row ?? null;
 }
+
+// 非登録メンバーを家族グループへ追加し、追加した情報を返す。
+export async function createUnregisteredMemberRow(params: {
+  familyId: number;
+  name: string;
+}): Promise<{ id: number; name: string } | null> {
+  const row = await getDb()
+    .prepare(
+      "INSERT INTO unregistered_members (family_id, name) VALUES (?, ?) ON CONFLICT(family_id, name) DO NOTHING RETURNING id, name",
+    )
+    .bind(params.familyId, params.name)
+    .first<{ id: number; name: string }>();
+
+  return row ?? null;
+}
+
+// 家族グループ内の非登録メンバーを削除する。削除件数を返して、存在確認に使う。
+export async function deleteUnregisteredMemberRow(
+  familyId: number,
+  memberId: number,
+): Promise<boolean> {
+  const db = getDb();
+  const member = await db
+    .prepare("SELECT id FROM unregistered_members WHERE id = ? AND family_id = ?")
+    .bind(memberId, familyId)
+    .first<{ id: number }>();
+  if (!member) {
+    return false;
+  }
+  await db.batch([
+    db.prepare("DELETE FROM todo_assignees WHERE unregistered_member_id = ?").bind(memberId),
+    db.prepare("DELETE FROM unregistered_members WHERE id = ?").bind(memberId),
+  ]);
+  return true;
+}
+
+// 招待コードと有効期限を新しい値へ更新する。
+export async function updateInviteCode(params: {
+  familyId: number;
+  inviteCode: string;
+  expiresAt: Date;
+}): Promise<void> {
+  await getDb()
+    .prepare("UPDATE families SET invite_code = ?, invite_code_expires_at = ? WHERE id = ?")
+    .bind(params.inviteCode, params.expiresAt.toISOString(), params.familyId)
+    .run();
+}
+
+// 指定ユーザー以外で最も早く参加したメンバーを返す。作成者の引き継ぎに使う。
+export async function findOldestFamilyMemberExcept(
+  familyId: number,
+  excludedUserId: number,
+): Promise<{ id: number } | null> {
+  const row = await getDb()
+    .prepare(
+      "SELECT id FROM users WHERE family_id = ? AND id != ? ORDER BY created_at ASC, id ASC LIMIT 1",
+    )
+    .bind(familyId, excludedUserId)
+    .first<{ id: number }>();
+  return row ?? null;
+}
+
+// グループ退出時に、自分を担当者にした関連付けと所属情報を削除する。
+export async function leaveFamilyRow(familyId: number, userId: number): Promise<void> {
+  const db = getDb();
+  await db.batch([
+    db
+      .prepare(
+        "DELETE FROM todo_assignees WHERE user_id = ? AND todo_id IN (SELECT id FROM todos WHERE family_id = ?)",
+      )
+      .bind(userId, familyId),
+    db.prepare("UPDATE users SET family_id = NULL WHERE id = ?").bind(userId),
+  ]);
+}
+
+// 残ったメンバーへグループ作成者を引き継ぐ。
+export async function updateFamilyCreator(familyId: number, userId: number): Promise<void> {
+  await getDb()
+    .prepare("UPDATE families SET created_by_user_id = ? WHERE id = ?")
+    .bind(userId, familyId)
+    .run();
+}
+
+// グループとグループに属するデータを削除する。外部キーの参照順に削除する。
+export async function deleteFamilyRow(familyId: number): Promise<void> {
+  const db = getDb();
+  await db.batch([
+    db
+      .prepare("DELETE FROM comments WHERE todo_id IN (SELECT id FROM todos WHERE family_id = ?)")
+      .bind(familyId),
+    db
+      .prepare(
+        "DELETE FROM todo_assignees WHERE todo_id IN (SELECT id FROM todos WHERE family_id = ?)",
+      )
+      .bind(familyId),
+    db.prepare("DELETE FROM todos WHERE family_id = ?").bind(familyId),
+    db.prepare("DELETE FROM unregistered_members WHERE family_id = ?").bind(familyId),
+    db.prepare("UPDATE users SET family_id = NULL WHERE family_id = ?").bind(familyId),
+    db.prepare("DELETE FROM families WHERE id = ?").bind(familyId),
+  ]);
+}

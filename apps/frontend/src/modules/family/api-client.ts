@@ -10,14 +10,37 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // docs/specs/02_basic-design/family-todo/12_家族グループ作成・参加.md「7. エラー時の表示文言」のとおり。
 export class FamilyError extends Error {
   readonly placement: "field" | "top";
+  readonly status?: number;
 
-  constructor(message: string, placement: "field" | "top") {
+  constructor(message: string, placement: "field" | "top", status?: number) {
     super(message);
     this.placement = placement;
+    this.status = status;
   }
 }
 
 export interface FamilySummary {
+  id: number;
+  name: string;
+}
+
+// 家族グループ設定画面に必要なグループの詳細情報。
+export interface FamilyDetail extends FamilySummary {
+  inviteCode: string;
+  inviteCodeExpiresAt: string;
+  createdByUserId: number;
+  createdAt: string;
+}
+
+// 家族グループ設定画面に表示する登録ユーザー。
+export interface FamilyMember {
+  id: number;
+  displayName: string;
+  isCurrentUser: boolean;
+}
+
+// 家族グループ設定画面に表示する非登録メンバー。
+export interface UnregisteredFamilyMember {
   id: number;
   name: string;
 }
@@ -36,6 +59,16 @@ async function postJson(path: string, body: unknown): Promise<Response> {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  }).catch((): never => {
+    throw new FamilyError(FAMILY_ERROR_MESSAGES.network, "top");
+  });
+}
+
+// BackendへDELETEリクエストを送る。Cookieでセッションを渡す。
+async function deleteJson(path: string): Promise<Response> {
+  return fetch(`${API_BASE_URL}${path}`, {
+    method: "DELETE",
+    credentials: "include",
   }).catch((): never => {
     throw new FamilyError(FAMILY_ERROR_MESSAGES.network, "top");
   });
@@ -83,6 +116,78 @@ export async function fetchMyFamily(): Promise<FamilySummary> {
   }
 
   return (await response.json()) as FamilySummary;
+}
+
+// 家族グループ設定に表示する詳細情報を取得する。
+export async function fetchMyFamilyDetail(): Promise<FamilyDetail> {
+  const response = await getJson("/api/v1/families/me");
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+  return (await response.json()) as FamilyDetail;
+}
+
+// 家族グループ設定に表示する登録ユーザー一覧を取得する。
+export async function fetchMyFamilyMembers(): Promise<FamilyMember[]> {
+  const response = await getJson("/api/v1/families/me/members");
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+  return (await response.json()) as FamilyMember[];
+}
+
+// 家族グループ設定に表示する非登録メンバー一覧を取得する。
+export async function fetchMyUnregisteredFamilyMembers(): Promise<UnregisteredFamilyMember[]> {
+  const response = await getJson("/api/v1/families/me/unregistered-members");
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+  return (await response.json()) as UnregisteredFamilyMember[];
+}
+
+// 非登録メンバーを追加する。入力エラーと重複は入力欄の近くへ返す。
+export async function addUnregisteredFamilyMember(name: string): Promise<UnregisteredFamilyMember> {
+  const response = await postJson("/api/v1/families/me/unregistered-members", { name });
+  if (response.status === 400 || response.status === 409) {
+    throw new FamilyError(await readErrorMessage(response), "field", response.status);
+  }
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+  return (await response.json()) as UnregisteredFamilyMember;
+}
+
+// 非登録メンバーを削除する。
+export async function deleteUnregisteredFamilyMember(memberId: number): Promise<void> {
+  const response = await deleteJson(`/api/v1/families/me/unregistered-members/${memberId}`);
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+}
+
+// 招待コードを再発行し、新しいグループ情報を返す。
+export async function renewFamilyInviteCode(): Promise<FamilyDetail> {
+  const response = await postJson("/api/v1/families/me/invite", {});
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+  return (await response.json()) as FamilyDetail;
+}
+
+// ログイン中のユーザーを家族グループから退出させる。
+export async function leaveFamily(): Promise<void> {
+  const response = await postJson("/api/v1/families/me/leave", {});
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
+}
+
+// 作成者として家族グループ全体を削除する。
+export async function deleteFamily(): Promise<void> {
+  const response = await deleteJson("/api/v1/families/me");
+  if (!response.ok) {
+    throw new FamilyError(await readErrorMessage(response), "top", response.status);
+  }
 }
 
 // 招待コードで家族グループに参加する。

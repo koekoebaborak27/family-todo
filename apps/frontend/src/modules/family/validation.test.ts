@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { validateFamilyName, validateInviteCode } from "./validation";
+import {
+  validateFamilyName,
+  validateInviteCode,
+  validateUnregisteredMemberName,
+} from "./validation";
 
 /**
  * 対象: family/validation
@@ -51,6 +55,22 @@ describe("family/validation validateInviteCode", () => {
 
     it("小文字を含む場合はエラーを返す", () => {
       expect(validateInviteCode("a3f9k2qp")).toBe("招待コードは半角英数字8桁で入力してください。");
+    });
+  });
+});
+
+describe("family/validation validateUnregisteredMemberName", () => {
+  describe("未入力のとき", () => {
+    it("「名前を入力してください。」を返す", () => {
+      expect(validateUnregisteredMemberName("  ")).toBe("名前を入力してください。");
+    });
+  });
+
+  describe("20文字を超えるとき", () => {
+    it("「名前は20文字以内で入力してください。」を返す", () => {
+      expect(validateUnregisteredMemberName("あ".repeat(21))).toBe(
+        "名前は20文字以内で入力してください。",
+      );
     });
   });
 });

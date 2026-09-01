@@ -22,3 +22,14 @@ export function validateInviteCode(inviteCode: string): string | null {
   }
   return null;
 }
+
+// 非登録メンバーの名前を画面で入力チェックする。
+export function validateUnregisteredMemberName(name: string): string | null {
+  if (name.trim().length === 0) {
+    return "名前を入力してください。";
+  }
+  if (name.length > 20) {
+    return "名前は20文字以内で入力してください。";
+  }
+  return null;
+}

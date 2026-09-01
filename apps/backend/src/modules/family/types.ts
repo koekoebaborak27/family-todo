@@ -14,3 +14,16 @@ export interface FamilyDetail {
   createdByUserId: number;
   createdAt: string;
 }
+
+// 家族グループ設定画面に表示する、ログイン可能なメンバー。
+export interface FamilyMember {
+  id: number;
+  displayName: string;
+  isCurrentUser: boolean;
+}
+
+// 家族グループ設定画面に表示する、ログインしないメンバー。
+export interface UnregisteredFamilyMember {
+  id: number;
+  name: string;
+}
