@@ -23,7 +23,7 @@
 | 区分            | 進捗                                                                                                                                                                |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 要件定義（未決事項の確定） | 8 / 8（完了）                                                                                                                                                         |
-| 基本設計〜デプロイ     | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築・8画面の実装・UI見直し 完了。単体テスト全体・結合テスト・CI/CD・デプロイは未着手 |
+| 基本設計〜デプロイ     | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築・8画面の実装・UI見直し・単体テスト 完了。結合テスト・CI/CD・デプロイは未着手 |
 
 ## 次にやること
 
@@ -37,7 +37,7 @@ pnpm dev:backend          # 別ターミナルで: http://localhost:8787
 pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 ```
 
-次の宿題は「単体テストを作成・実行する」。TESTING.mdが★必須とする対象（`service.ts`・`validation.ts`）でテストファイル自体が無かった2件（`family/service.ts`・`push-subscription/validation.ts`）は作成済み（[PR #12](https://github.com/koekoebaborak27/family-todo/pull/12)、マージ待ち）。次は、既存の各テストファイルの中身が境界値・異常系を十分網羅しているかのレビューから始める。
+次の宿題は「結合テスト（Playwrightによる画面テスト）を行う」。`e2e/`は未着手のため、対象画面の洗い出しとPlaywrightのセットアップから始める（`@docs/skills/playwright-evidence-test.md`）。
 
 - [x] 1. [要件定義書](../specs/01_requirements/family-todo/01_家族todo共有アプリ.md)の「17. 未決事項」を確定させた（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-要件定義の未決事項8件を確定)
 - [x] 2. 基本設計（画面遷移・API仕様・DBスキーマ概要）とデザイントークンを決定した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
@@ -57,6 +57,7 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 - [x] 16. 実装を続ける（7機能目として個人設定を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-個人設定機能を実装)
 - [x] 17. 実装を続ける（8機能目としてiOSインストール案内を実装した。8画面すべて実装完了）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装)
 - [x] 18. UI見直し（ログイン画面をユーザー提供の画像で再実装し、他7画面はスクリーンショットで確認した。全画面に影響していたglobals.cssの余白バグも修正した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認)
+- [x] 19. 単体テストを作成・実行する（TESTING.mdの観点チェックリストに沿って抜けを洗い出し、テストファイル自体が無かった2件と、既存テストの境界値・異常系の抜け25件を補った）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-単体テストのカバレッジ漏れを補う) [履歴](history/2026-09.md#2026-09-01-既存の単体テストに境界値異常系の抜けを補う)
 
 ## 残っているタスク
 
@@ -74,7 +75,7 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 - [x] 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-開発環境を構築nextjs--express--cloudflare-d1--google-oauth--web-push-の初期セットアップ)
 - [x] 実装する（8画面すべて実装完了。最後にiOSインストール案内を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装)
 - [x] UI見直し。一通り画面を確認し、違和感のある画面はデザインを検討しなおす（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認)
-- [ ] 単体テスト（Vitestによるロジックテスト）を作成・実行する
+- [x] 単体テスト（Vitestによるロジックテスト）を作成・実行する（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-単体テストのカバレッジ漏れを補う) [履歴](history/2026-09.md#2026-09-01-既存の単体テストに境界値異常系の抜けを補う)
 - [ ] 結合テスト（Playwrightによる画面テスト）を行う
 - [ ] GitHub Actions による CI/CD を構築する
 - [ ] Cloudflare へデプロイする
@@ -85,7 +86,7 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `test/unit-test-coverage-gaps`（`main` から作成、[PR #12](https://github.com/koekoebaborak27/family-todo/pull/12) 作成済み・マージ待ち） |
+| 作業ブランチ | `main`（[PR #12](https://github.com/koekoebaborak27/family-todo/pull/12)・[PR #13](https://github.com/koekoebaborak27/family-todo/pull/13) ともマージ済み） |
 | ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
 | 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）、ToDo追加・編集画面（`/todos/new`・`/todos/:id/edit`。期限・繰り返し・担当者/フォロー役の指定）、ToDo詳細画面（`/todos/:id`。内容表示・完了/未完了切り替え・編集/削除・コメントの追加/編集/削除）、家族グループ設定画面（`/family/settings`。メンバー管理・招待コード再発行・退出・作成者による削除）、個人設定画面（`/settings`。表示名・通知種別・期限の基準時刻・Push通知の端末状態・ログアウト）、iOSインストール案内（ToDo一覧・家族グループ作成/参加画面の上部に重ねて表示するバナーとDrawer。ホーム画面未追加のiOS Safariでのみ表示し、閉じた日時は端末の`localStorage`で7日間管理）。ログイン画面はユーザー提供の画像で再実装済み（PC/スマホで背景写真を出し分け）。他7画面はローカルD1へのセッション直接投入（実際のGoogleアカウントは未使用）でブラウザ確認済み、ユーザー承認済み → [`ローカルD1へのセッション投入によるUI確認.md`](notes/ローカルD1へのセッション投入によるUI確認.md)。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信・実機iPhoneでのバナー表示は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) [履歴](history/2026-09.md#2026-09-01-todo追加編集機能を実装) [履歴](history/2026-09.md#2026-09-01-todo詳細機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ設定機能を実装) [履歴](history/2026-09.md#2026-09-01-個人設定機能を実装) [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装) [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認) |
 | 本番 | 未構築 |
