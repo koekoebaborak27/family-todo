@@ -8,6 +8,7 @@ import type { AuthContext } from "./modules/auth";
 import { categoryRouter } from "./modules/category";
 import { familyRouter } from "./modules/family";
 import { pushSubscriptionRouter } from "./modules/push-subscription";
+import { settingsRouter } from "./modules/settings";
 import { todoRouter } from "./modules/todo";
 import { AppError } from "./shared/errors/app-error";
 import { getSessionIdFromCookieHeader } from "./shared/http/session-cookie";
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", (env as Env).FRONTEND_ORIGIN);
   res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
     res.status(204).end();
@@ -61,6 +62,10 @@ app.use("/api/v1", todoRouter);
 
 app.use("/api/v1/push-subscriptions", requireAuth);
 app.use("/api/v1", pushSubscriptionRouter);
+
+app.use("/api/v1/users/me", requireAuth);
+app.use("/api/v1/notification-settings", requireAuth);
+app.use("/api/v1", settingsRouter);
 
 // エラー整形とログ出力は、業務コードではなくここで1回だけ行う
 // （apps/backend/AGENTS.md「観測性（ログ）」）。

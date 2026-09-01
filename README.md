@@ -8,7 +8,7 @@
 - **認証**: Googleログイン（OAuth）
 - **通知**: Web Push（VAPID）
 
-pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は8画面中6画面まで実装が進んだ段階で、残りの画面は順次実装していく。
+pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は8画面中7画面まで実装が進んだ段階で、残りの画面は順次実装していく。
 
 このリポジトリは **Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ように作られています。詳しくは「AIエージェントによる開発」を参照。
 
@@ -24,6 +24,7 @@ pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packa
 | ToDo追加・編集 | `/todos/new`（編集: `/todos/:id/edit`） | タイトル・カテゴリ・優先度・期限・繰り返し・担当者/フォロー役を指定してToDoを保存する → [`docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md`](docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md) |
 | ToDo詳細 | `/todos/:id` | ToDoの内容確認・完了状態の切り替え・編集/削除・コメントの追加/編集/削除を行う → [`docs/specs/02_basic-design/family-todo/18_ToDo詳細.md`](docs/specs/02_basic-design/family-todo/18_ToDo詳細.md) |
 | 家族グループ設定 | `/family/settings` | メンバーの確認、非登録メンバーの追加・削除、招待、退出、作成者によるグループ削除を行う → [`docs/specs/02_basic-design/family-todo/20_家族グループ設定.md`](docs/specs/02_basic-design/family-todo/20_家族グループ設定.md) |
+| 個人設定 | `/settings` | 表示名・通知・期限の基準時刻・Push通知の端末状態を設定し、ログアウトする → [`docs/specs/02_basic-design/family-todo/22_個人設定.md`](docs/specs/02_basic-design/family-todo/22_個人設定.md) |
 
 ## セットアップ
 
