@@ -3,7 +3,12 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { exchangeGoogleCode, type LoginError } from "../api-client";
-import { consumeOAuthState, getPostLoginPath, LOGIN_ERROR_MESSAGES } from "../service";
+import {
+  consumeOAuthState,
+  consumePendingInviteCode,
+  getPostLoginPath,
+  LOGIN_ERROR_MESSAGES,
+} from "../service";
 
 // Googleの認可画面から戻ってくる画面。認可コードをBackendへ渡してログインを完了させ、
 // 結果に応じて次の画面（成功）かログイン画面（失敗。エラー文言付き）へ遷移する。
@@ -37,7 +42,7 @@ export function OAuthCallbackScreen() {
     exchangeGoogleCode(code)
       .then((result) => {
         if (!cancelled) {
-          router.replace(getPostLoginPath(result.hasFamily));
+          router.replace(getPostLoginPath(result.hasFamily, consumePendingInviteCode()));
         }
       })
       .catch((error: LoginError) => {
