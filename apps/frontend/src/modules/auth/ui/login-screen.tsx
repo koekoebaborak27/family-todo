@@ -2,12 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image, { getImageProps } from "next/image";
 import { Button } from "@/shared/ui/button";
 import { fetchMe, type LoginError } from "../api-client";
 import { buildGoogleAuthUrl, getPostLoginPath, storePendingInviteCode } from "../service";
 import { GoogleIcon } from "./google-icon";
 
 type Phase = "checking" | "ready" | "redirecting";
+
+// 背景写真はPC/スマホで別の画像を使う（構図が縦横で異なるため）。
+// <picture>のsourceでブラウザ自身に選ばせることで、表示しない方の画像は読み込まれない
+// （JS側で表示/非表示を切り替える方式だと、両方を読み込んでしまい通信量が無駄になる）。
+const backgroundImageCommon = { alt: "", sizes: "100vw", priority: true } as const;
+const {
+  props: { srcSet: pcBackgroundSrcSet },
+} = getImageProps({
+  ...backgroundImageCommon,
+  src: "/images/login-background-pc.webp",
+  width: 1600,
+  height: 900,
+});
+const {
+  props: { srcSet: mobileBackgroundSrcSet, ...mobileBackgroundImageProps },
+} = getImageProps({
+  ...backgroundImageCommon,
+  src: "/images/login-background-mobile.webp",
+  width: 900,
+  height: 1599,
+});
 
 // ログイン画面。画面表示時に GET /auth/me でログイン状態を確認し、
 // ログイン済みならボタンを見せずに遷移先へ移動する（ちらつき防止）。
@@ -70,29 +92,42 @@ export function LoginScreen() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="flex flex-col items-center gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">家族 de TODO！</h1>
-        <p className="text-sm text-muted-foreground">家族のちょっとしたToDoを、みんなで共有。</p>
-      </div>
+    <main className="relative flex min-h-screen flex-col items-center justify-end overflow-hidden p-6 pb-12 md:p-16">
+      <picture className="absolute inset-0 block">
+        <source media="(min-width: 768px)" srcSet={pcBackgroundSrcSet} />
+        <img
+          {...mobileBackgroundImageProps}
+          alt=""
+          srcSet={mobileBackgroundSrcSet}
+          className="h-full w-full object-cover"
+        />
+      </picture>
 
-      {phase === "checking" ? (
-        <p className="text-sm text-muted-foreground" role="status">
-          読み込んでいます…
-        </p>
-      ) : (
-        <div className="flex flex-col items-center gap-3">
-          <Button onClick={handleLoginClick} disabled={phase === "redirecting"} className="gap-2">
-            <GoogleIcon />
-            {phase === "redirecting" ? "ログインしています…" : "Googleでログイン"}
-          </Button>
-          {errorMessage && (
-            <p className="text-sm text-destructive" role="alert">
-              {errorMessage}
-            </p>
-          )}
+      <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-4 rounded-2xl bg-foreground/85 p-8 text-center text-background shadow-sm backdrop-blur-sm">
+        <Image src="/images/login-icon.webp" alt="" width={72} height={74} />
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">家族 de TODO！</h1>
+          <p className="text-sm text-background/80">家族のちょっとしたToDoを、みんなで共有。</p>
         </div>
-      )}
+
+        {phase === "checking" ? (
+          <p className="text-sm text-background/80" role="status">
+            読み込んでいます…
+          </p>
+        ) : (
+          <div className="flex flex-col items-center gap-3">
+            <Button onClick={handleLoginClick} disabled={phase === "redirecting"} className="gap-2">
+              <GoogleIcon />
+              {phase === "redirecting" ? "ログインしています…" : "Googleでログイン"}
+            </Button>
+            {errorMessage && (
+              <p className="text-sm text-destructive" role="alert">
+                {errorMessage}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
