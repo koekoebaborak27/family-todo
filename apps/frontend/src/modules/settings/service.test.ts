@@ -16,6 +16,10 @@ describe("settings/service validateDisplayName", () => {
     it("「表示名は20文字以内で入力してください。」を返す", () => {
       expect(validateDisplayName("あ".repeat(21))).toBe("表示名は20文字以内で入力してください。");
     });
+
+    it("ちょうど20文字ならnullを返す", () => {
+      expect(validateDisplayName("あ".repeat(20))).toBeNull();
+    });
   });
 
   it("20文字以内ならnullを返す", () => {

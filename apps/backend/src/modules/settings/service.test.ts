@@ -103,6 +103,30 @@ describe("settings/service updateMyNotificationSetting", () => {
     });
   });
 
+  describe("期限接近通知にremindBeforeValueを指定しないとき", () => {
+    it("AppError(VALIDATION_ERROR)を投げる", async () => {
+      await expect(
+        updateMyNotificationSetting(1, "due_soon", {
+          enabled: true,
+          remindBeforeUnit: "days",
+        }),
+      ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+      expect(updateNotificationSetting).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("期限接近通知にremindBeforeUnitを指定しないとき", () => {
+    it("AppError(VALIDATION_ERROR)を投げる", async () => {
+      await expect(
+        updateMyNotificationSetting(1, "due_soon", {
+          enabled: true,
+          remindBeforeValue: 1,
+        }),
+      ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+      expect(updateNotificationSetting).not.toHaveBeenCalled();
+    });
+  });
+
   it("期限接近通知の有効な時刻を保存する", async () => {
     await updateMyNotificationSetting(1, "due_soon", {
       enabled: false,
