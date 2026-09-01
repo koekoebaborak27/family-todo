@@ -60,6 +60,10 @@ describe("family/validation validateInviteCode", () => {
 });
 
 describe("family/validation validateUnregisteredMemberName", () => {
+  it("20文字以内ならnullを返す（エラー無し）", () => {
+    expect(validateUnregisteredMemberName("山田太郎")).toBeNull();
+  });
+
   describe("未入力のとき", () => {
     it("「名前を入力してください。」を返す", () => {
       expect(validateUnregisteredMemberName("  ")).toBe("名前を入力してください。");
@@ -71,6 +75,10 @@ describe("family/validation validateUnregisteredMemberName", () => {
       expect(validateUnregisteredMemberName("あ".repeat(21))).toBe(
         "名前は20文字以内で入力してください。",
       );
+    });
+
+    it("ちょうど20文字ならnullを返す", () => {
+      expect(validateUnregisteredMemberName("あ".repeat(20))).toBeNull();
     });
   });
 });

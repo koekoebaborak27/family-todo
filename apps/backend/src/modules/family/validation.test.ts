@@ -74,6 +74,16 @@ describe("family/validation joinFamilySchema", () => {
 });
 
 describe("family/validation createUnregisteredMemberSchema", () => {
+  it("20文字以内のnameなら検証を通す", () => {
+    const result = createUnregisteredMemberSchema.safeParse({ name: "太郎" });
+    expect(result.success).toBe(true);
+  });
+
+  it("ちょうど20文字なら検証を通す", () => {
+    const result = createUnregisteredMemberSchema.safeParse({ name: "あ".repeat(20) });
+    expect(result.success).toBe(true);
+  });
+
   describe("名前が空白のみのとき", () => {
     it("「名前を入力してください。」で検証を弾く", () => {
       const result = createUnregisteredMemberSchema.safeParse({ name: "  " });

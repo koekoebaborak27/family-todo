@@ -2,13 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   assigneeLabel,
   emptyStateMessage,
+  formatCommentDate,
   formatCompletedInfo,
+  formatCreatedInfo,
   formatDueAt,
   isOverdue,
+  recurrenceDetailLabel,
   recurrenceLabel,
   sortTodos,
 } from "./service";
-import type { Todo, TodoAssignee } from "./types";
+import type { RecurrenceType, Todo, TodoAssignee, TodoDetail } from "./types";
 
 /**
  * 対象: todo/service
@@ -42,6 +45,18 @@ function makeAssignee(displayName: string, overrides: Partial<TodoAssignee> = {}
   return { type: "user", id: 1, displayName, ...overrides };
 }
 
+// テスト用のToDo詳細ファクトリ。差分だけ override する。
+function makeTodoDetail(overrides: Partial<TodoDetail> = {}): TodoDetail {
+  return {
+    ...makeTodo(),
+    recurrenceConfig: null,
+    assignees: [],
+    createdByDisplayName: "太郎",
+    comments: [],
+    ...overrides,
+  };
+}
+
 describe("todo/service recurrenceLabel", () => {
   it("noneのときはnullを返す", () => {
     expect(recurrenceLabel("none")).toBeNull();
@@ -57,6 +72,59 @@ describe("todo/service recurrenceLabel", () => {
 
   it("monthlyのときは「毎月」を返す", () => {
     expect(recurrenceLabel("monthly")).toBe("毎月");
+  });
+});
+
+describe("todo/service recurrenceDetailLabel", () => {
+  describe("recurrenceTypeがnoneのとき", () => {
+    it("「なし」を返す", () => {
+      const todo = makeTodoDetail({ recurrenceType: "none" });
+      expect(recurrenceDetailLabel(todo)).toBe("なし");
+    });
+  });
+
+  describe("recurrenceTypeがdailyのとき", () => {
+    it("「毎日」を返す", () => {
+      const todo = makeTodoDetail({ recurrenceType: "daily" });
+      expect(recurrenceDetailLabel(todo)).toBe("毎日");
+    });
+  });
+
+  describe("recurrenceTypeがweeklyのとき", () => {
+    it("recurrenceConfigに曜日があれば「毎週 月・水」のように曜日を連結して返す", () => {
+      const todo = makeTodoDetail({
+        recurrenceType: "weekly",
+        recurrenceConfig: { weekdays: [1, 3] },
+      });
+      expect(recurrenceDetailLabel(todo)).toBe("毎週 月・水");
+    });
+
+    it("recurrenceConfigが無ければ「毎週」のみを返す", () => {
+      const todo = makeTodoDetail({ recurrenceType: "weekly", recurrenceConfig: null });
+      expect(recurrenceDetailLabel(todo)).toBe("毎週");
+    });
+  });
+
+  describe("recurrenceTypeがmonthlyのとき", () => {
+    it("recurrenceConfigに日付があれば「毎月 15日」のように返す", () => {
+      const todo = makeTodoDetail({
+        recurrenceType: "monthly",
+        recurrenceConfig: { day: 15 },
+      });
+      expect(recurrenceDetailLabel(todo)).toBe("毎月 15日");
+    });
+
+    it("recurrenceConfigが無ければ「毎月」のみを返す", () => {
+      const todo = makeTodoDetail({ recurrenceType: "monthly", recurrenceConfig: null });
+      expect(recurrenceDetailLabel(todo)).toBe("毎月");
+    });
+  });
+
+  describe("recurrenceTypeが想定外の値のとき", () => {
+    it("「なし」を返す", () => {
+      const todo = makeTodoDetail({ recurrenceType: "yearly" as RecurrenceType });
+      expect(recurrenceDetailLabel(todo)).toBe("なし");
+    });
   });
 });
 
@@ -77,6 +145,18 @@ describe("todo/service formatDueAt", () => {
 describe("todo/service formatCompletedInfo", () => {
   it("「表示名 が M/D(曜日) に完了」の形式で返す", () => {
     expect(formatCompletedInfo("太郎", "2026-09-01T10:00:00")).toBe("太郎 が 9/1(火) に完了");
+  });
+});
+
+describe("todo/service formatCreatedInfo", () => {
+  it("「表示名 が M/D(曜日) に作成」の形式で返す", () => {
+    expect(formatCreatedInfo("太郎", "2026-09-01T10:00:00")).toBe("太郎 が 9/1(火) に作成");
+  });
+});
+
+describe("todo/service formatCommentDate", () => {
+  it("「M/D(曜日) HH:MM」の形式で返す", () => {
+    expect(formatCommentDate("2026-09-03T18:05:00")).toBe("9/3(木) 18:05");
   });
 });
 

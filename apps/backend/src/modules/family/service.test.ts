@@ -9,6 +9,8 @@ import {
   findFamilyByInviteCode,
   findOldestFamilyMemberExcept,
   leaveFamilyRow,
+  listFamilyMembers,
+  listUnregisteredFamilyMembers,
   setUserFamilyId,
   updateFamilyCreator,
   updateInviteCode,
@@ -18,6 +20,8 @@ import {
   createFamily,
   deleteMyFamily,
   getMyFamily,
+  getMyFamilyMembers,
+  getMyUnregisteredFamilyMembers,
   joinFamily,
   leaveMyFamily,
   removeMyUnregisteredFamilyMember,
@@ -40,6 +44,8 @@ vi.mock("./repository", () => ({
   deleteFamilyRow: vi.fn(),
   findOldestFamilyMemberExcept: vi.fn(),
   leaveFamilyRow: vi.fn(),
+  listFamilyMembers: vi.fn(),
+  listUnregisteredFamilyMembers: vi.fn(),
   updateFamilyCreator: vi.fn(),
   updateInviteCode: vi.fn(),
   setUserFamilyId: vi.fn(),
@@ -196,6 +202,56 @@ describe("family/service getMyFamily", () => {
   });
 });
 
+describe("family/service getMyFamilyMembers", () => {
+  describe("正常系", () => {
+    it("所属グループのメンバー一覧を、自分自身の判定を付けて返す", async () => {
+      vi.mocked(listFamilyMembers).mockResolvedValue([
+        { id: 2, display_name: "花子" },
+        { id: 3, display_name: "太郎" },
+      ]);
+
+      const result = await getMyFamilyMembers(affiliatedUser);
+
+      expect(listFamilyMembers).toHaveBeenCalledWith(99);
+      expect(result).toEqual([
+        { id: 2, displayName: "花子", isCurrentUser: true },
+        { id: 3, displayName: "太郎", isCurrentUser: false },
+      ]);
+    });
+  });
+
+  describe("グループ未所属のとき", () => {
+    it("AppError(FORBIDDEN) を投げ、repositoryは呼ばない", async () => {
+      await expect(getMyFamilyMembers(unaffiliatedUser)).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
+      expect(listFamilyMembers).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe("family/service getMyUnregisteredFamilyMembers", () => {
+  describe("正常系", () => {
+    it("所属グループの非登録メンバー一覧を返す", async () => {
+      vi.mocked(listUnregisteredFamilyMembers).mockResolvedValue([{ id: 8, name: "太郎" }]);
+
+      const result = await getMyUnregisteredFamilyMembers(affiliatedUser);
+
+      expect(listUnregisteredFamilyMembers).toHaveBeenCalledWith(99);
+      expect(result).toEqual([{ id: 8, name: "太郎" }]);
+    });
+  });
+
+  describe("グループ未所属のとき", () => {
+    it("AppError(FORBIDDEN) を投げ、repositoryは呼ばない", async () => {
+      await expect(getMyUnregisteredFamilyMembers(unaffiliatedUser)).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
+      expect(listUnregisteredFamilyMembers).not.toHaveBeenCalled();
+    });
+  });
+});
+
 describe("family/service addMyUnregisteredFamilyMember", () => {
   describe("正常系", () => {
     it("未登録メンバーを追加して追加結果を返す", async () => {
@@ -310,6 +366,25 @@ describe("family/service leaveMyFamily", () => {
 
       expect(leaveFamilyRow).toHaveBeenCalledWith(99, 2);
       expect(updateFamilyCreator).toHaveBeenCalledWith(99, 3);
+    });
+  });
+
+  describe("作成者ではないメンバーが他のメンバーを残して退出するとき", () => {
+    it("自分を退出させ、作成者の引き継ぎは行わない", async () => {
+      vi.mocked(findFamilyById).mockResolvedValue({
+        id: 99,
+        name: "山田家",
+        invite_code: "A3F9K2QP",
+        invite_code_expires_at: "2026-09-08T00:00:00.000Z",
+        created_by_user_id: 1,
+        created_at: "2026-08-30T00:00:00.000Z",
+      });
+      vi.mocked(findOldestFamilyMemberExcept).mockResolvedValue({ id: 3 });
+
+      await leaveMyFamily(affiliatedUser);
+
+      expect(leaveFamilyRow).toHaveBeenCalledWith(99, 2);
+      expect(updateFamilyCreator).not.toHaveBeenCalled();
     });
   });
 });
