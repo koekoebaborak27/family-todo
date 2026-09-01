@@ -37,7 +37,7 @@ pnpm dev:backend          # 別ターミナルで: http://localhost:8787
 pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 ```
 
-次の宿題は「結合テスト（Playwrightによる画面テスト）を行う」の続き。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集の4画面は完了済み（`e2e/auth/`・`e2e/todo/`・`e2e/family/`、共通ヘルパーは`e2e/support/`）。残り4画面（ToDo詳細／家族グループ設定／個人設定／iOSインストール案内）から対象を選び、`@docs/skills/create-unit-test-spec.md`で仕様書を作ってから`@docs/skills/playwright-evidence-test.md`でテストする（ログイン方法は引き続き実Googleアカウントが使えないため、`e2e/support/seed.ts`のローカルD1セッション直接投入の仕組みを再利用する）。現在の作業ブランチ`test/e2e-login-todo-list`はmain未マージのため、先にPRを作成・マージするか、このブランチへ積み増すかをユーザーに確認する。
+次の宿題は「結合テスト（Playwrightによる画面テスト）を行う」の続き。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集の4画面は完了済み（`e2e/auth/`・`e2e/todo/`・`e2e/family/`、共通ヘルパーは`e2e/support/`。[PR #14](https://github.com/koekoebaborak27/family-todo/pull/14)で`main`マージ済み）。残り4画面（ToDo詳細／家族グループ設定／個人設定／iOSインストール案内）から対象を選び、`@docs/skills/create-unit-test-spec.md`で仕様書を作ってから`@docs/skills/playwright-evidence-test.md`でテストする（ログイン方法は引き続き実Googleアカウントが使えないため、`e2e/support/seed.ts`のローカルD1セッション直接投入の仕組みを再利用する）。
 
 - [x] 1. [要件定義書](../specs/01_requirements/family-todo/01_家族todo共有アプリ.md)の「17. 未決事項」を確定させた（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-要件定義の未決事項8件を確定)
 - [x] 2. 基本設計（画面遷移・API仕様・DBスキーマ概要）とデザイントークンを決定した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
@@ -88,7 +88,7 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `test/e2e-login-todo-list`（`main`未マージ。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集の結合テストと、実ブラウザでのToDo担当者編集を常に失敗させていたCORS設定不備の修正を含む） |
+| 作業ブランチ | `main`（[PR #14](https://github.com/koekoebaborak27/family-todo/pull/14) マージ済み。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集の結合テストと、実ブラウザでのToDo担当者編集を常に失敗させていたCORS設定不備の修正を含む） |
 | ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
 | 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）、ToDo追加・編集画面（`/todos/new`・`/todos/:id/edit`。期限・繰り返し・担当者/フォロー役の指定）、ToDo詳細画面（`/todos/:id`。内容表示・完了/未完了切り替え・編集/削除・コメントの追加/編集/削除）、家族グループ設定画面（`/family/settings`。メンバー管理・招待コード再発行・退出・作成者による削除）、個人設定画面（`/settings`。表示名・通知種別・期限の基準時刻・Push通知の端末状態・ログアウト）、iOSインストール案内（ToDo一覧・家族グループ作成/参加画面の上部に重ねて表示するバナーとDrawer。ホーム画面未追加のiOS Safariでのみ表示し、閉じた日時は端末の`localStorage`で7日間管理）。ログイン画面はユーザー提供の画像で再実装済み（PC/スマホで背景写真を出し分け）。他7画面はローカルD1へのセッション直接投入（実際のGoogleアカウントは未使用）でブラウザ確認済み、ユーザー承認済み → [`ローカルD1へのセッション投入によるUI確認.md`](notes/ローカルD1へのセッション投入によるUI確認.md)。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信・実機iPhoneでのバナー表示は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) [履歴](history/2026-09.md#2026-09-01-todo追加編集機能を実装) [履歴](history/2026-09.md#2026-09-01-todo詳細機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ設定機能を実装) [履歴](history/2026-09.md#2026-09-01-個人設定機能を実装) [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装) [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認) |
 | 本番 | 未構築 |
