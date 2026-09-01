@@ -7,6 +7,7 @@
       "Bash(pnpm typecheck)",
       "Bash(pnpm test)",
       "Bash(pnpm test:*)",
+      "Bash(pnpm build)",
       "Bash(git status *)",
       "Bash(git diff *)",
       "Bash(git log *)",
@@ -15,8 +16,8 @@
     ],
     "deny": [
       "Read(.env)",
+      "Read(**/.dev.vars)",
       "Bash(pnpm db:reset*)",
-      "Bash(prisma migrate reset*)",
       "Bash(git push --force*)",
       "Bash(git reset --hard*)"
     ]

@@ -28,22 +28,23 @@ Next.js（Frontend）と Express（Backend・REST API）を分離し、Cloudflar
 
 | ディレクトリ | 説明 |
 | --- | --- |
-| `src/` | アプリ本体。規約は `@src/AGENTS.md` |
+| `apps/frontend/` | Next.js（PWA）。規約は `@apps/frontend/AGENTS.md` |
+| `apps/backend/` | Express（Cloudflare Workers上で実行）。規約は `@apps/backend/AGENTS.md`。D1マイグレーションは `apps/backend/migrations/` |
+| `packages/shared/` | Frontend/Backend共通の型など（ビルド不要のTypeScriptソースをそのまま参照） |
 | `e2e/` | ブラウザ操作の自動テスト（Playwright）。`@docs/skills/playwright-evidence-test.md` |
-| `docs/` | 設計・計画ドキュメント。作業手順（スキル）の正本は `docs/skills/`、開発フローは `docs/development/gitの操作ルール.md`、残タスク一式は `docs/todo/`（本編 `TODO.md` + 補足 `notes/` + 履歴 `history/`）。設計書は機能ごとに分割し、各ディレクトリの `README.md` が索引 |
+| `docs/` | 設計・計画ドキュメント。作業手順（スキル）の正本は `docs/skills/`、開発フローは `docs/development/gitの操作ルール.md`、残タスク一式は `docs/todo/`（本編 `TODO.md` + 補足 `notes/` + 履歴 `history/`） |
 | `.github/` | Copilot 指示（`copilot-instructions.md`）+ Copilot プロンプト（`prompts/`）+ Copilot カスタムエージェント（`agents/<name>.agent.md`）+ CI ワークフロー（`workflows/ci.yml`） |
 | `.agents/` | Codex が読むリポジトリ内スキル（`skills/<name>/SKILL.md`。サブエージェントの入口も兼ねる） |
 | `.codex/` | Codex CLI のプロジェクト設定（`config.toml`。サンドボックス / 承認ポリシー）+ 権限ルール（`rules/*.rules`） |
 | `.claude/` | Claude Code が読むスキル（`skills/<name>/SKILL.md`）+ サブエージェント（`agents/<name>.md`）+ 権限設定（`settings.json`） |
 | `.vscode/` | 推奨拡張機能 + Copilot の権限設定（`settings.json`） |
-| `prisma/` | （Prisma を採用する場合）スキーマ・マイグレーション・seed。規約は `@prisma/AGENTS.md`。使わないならフォルダごと削除する |
 
 ## ポイント
 
-- **技術スタック**: 言語 = TypeScript / Node.js（`.nvmrc` のバージョン）、パッケージマネージャ = pnpm、テスト = Vitest（単体）+ Playwright（画面）。フロントエンド = Next.js（PWA）、バックエンド = Express（REST API）、DB = Cloudflare D1。
-- **アーキテクチャ**: 依存方向は `app → modules → shared` の一方向のみ。詳細 → `@src/AGENTS.md`
-- **CI は GitHub Actions**（lint / format / typecheck / test）。デプロイ先は Cloudflare（Frontend/Backendの具体構成は基本設計で確定。現時点ではBackendはCloudflare Workers上でExpressを動かす方式が第一候補）。
-- **ローカル開発の起動方法**: 未定（コード未着手。基本設計・開発環境構築時に確定する）。
+- **技術スタック**: 言語 = TypeScript / Node.js（`.nvmrc` のバージョン）、パッケージマネージャ = pnpm（workspace）、テスト = Vitest（単体）+ Playwright（画面）。フロントエンド = Next.js（PWA、`apps/frontend/`）、バックエンド = Express on Cloudflare Workers（REST API、`apps/backend/`）、DB = Cloudflare D1（Prismaは不採用。マイグレーションは wrangler の機能で管理）。
+- **アーキテクチャ**: 依存方向は `app → modules → shared` の一方向のみ。詳細 → `@apps/frontend/AGENTS.md` / `@apps/backend/AGENTS.md`
+- **CI は GitHub Actions**（lint / format / typecheck / test / build）。デプロイ先は Cloudflare。Backendは Cloudflare Workers 上で Express を動かす方式で確定（技術検証・環境構築で動作確認済み）。Frontendの具体的なデプロイ方式（Pages / Workers Static Assets 等）は未定。
+- **ローカル開発の起動方法**: `pnpm install` の後、`pnpm dev:backend`（http://localhost:8787）と `pnpm dev:frontend`（http://localhost:3000）を別ターミナルで起動する。手順は [`README.md`](README.md)「セットアップ」参照。
 - **認証**: Googleログイン（OAuth）のみ。アプリ独自パスワードは持たない。権限はグループ内一律（家族グループ削除のみ作成者限定の例外）。
 
 ## 最小規約
@@ -57,7 +58,7 @@ Next.js（Frontend）と Express（Backend・REST API）を分離し、Cloudflar
 - **コードにはコメントを書く。** 関数・コンポーネント・エクスポートする定数は、定義の直前に「何をするものか」を必ず書く。関数の中でも、意図が読み取りにくい分岐・条件・値には理由を添える。書き方は次の 2 点を守る。
   - **1 文目で端的に何をするかを書き、2 文目以降で詳細や「何のために」を補う。** 例: `// リクエストで渡された検索条件を使いやすく変換する。` → `// 文字列のまま渡ってくるので、数値に変換する・値が入っていない項目には初期値を入れる、等を行う。`
   - **専門用語やカタカナ語に頼らず、平易な日本語で書く。** 「フォールバック」「ファサード」「楽観ロック」等はそのまま使わず、実際の動作を説明する言葉へ置き換える（例: 「代わりに分類一覧の一番先頭を選択状態にする」）。
-- **エージェントが確認なしで実行してよいコマンドと、単独で実行してはならない操作は `@docs/agent_permissions.md` が正本。** `.env` の読み取り、`git push --force` / `git reset --hard`、およびデータベースを作り直すコマンド（`pnpm db:reset` / `prisma migrate reset` 等）は設定ファイルでも禁止しているが、強制には穴があるため**規約としても実行しない**。
+- **エージェントが確認なしで実行してよいコマンドと、単独で実行してはならない操作は `@docs/agent_permissions.md` が正本。** `.env` / `.dev.vars` の読み取り、`git push --force` / `git reset --hard`、およびデータベースを作り直す・破壊するコマンド（`pnpm db:reset`、D1のデータを削除するコマンド等）は設定ファイルでも禁止しているが、強制には穴があるため**規約としても実行しない**。
 - `docs/todo/TODO.md` と `README.md` / `README_SIMPLE.md` の更新は、`@docs/skills/update-todo.md` の手順に従う。
 - **ドキュメントを分割・移動したら、参照元のリンクを必ず張り替える。** 移動先が 1 階層深くなる場合は本文中の相対リンク（`../`）も繰り上げる。作業後にリポジトリ全体の `.md` を走査してリンク切れが無いことを確認する。
 
@@ -67,14 +68,16 @@ Next.js（Frontend）と Express（Backend・REST API）を分離し、Cloudflar
 
 ```
 pnpm install        # 依存パッケージの取得
-pnpm lint           # ESLint
-pnpm format:check   # Prettier チェック
-pnpm typecheck      # tsc --noEmit
-pnpm test           # Vitest（単体）
-pnpm test:watch     # Vitest（監視）
+pnpm dev:frontend    # Next.js 開発サーバー（http://localhost:3000）
+pnpm dev:backend     # wrangler dev（Express on Workers。http://localhost:8787）
+pnpm lint            # ESLint（apps/frontend は next lint 相当）
+pnpm format:check    # Prettier チェック
+pnpm typecheck       # 各ワークスペースの tsc --noEmit
+pnpm test            # 各ワークスペースの Vitest（単体）
+pnpm test:watch      # Vitest（監視）
+pnpm build           # 各ワークスペースのビルド確認（next build / wrangler deploy --dry-run）
+pnpm test:e2e        # Playwright（画面操作）
 ```
-
-フレームワークを導入したら `dev` / `build` / `start` などをここへ追記する。
 
 ## 参照
 
@@ -84,8 +87,8 @@ pnpm test:watch     # Vitest（監視）
 - コミット / PR レビュー観点: `REVIEW.md`
 - テスト方針（単体）: `TESTING.md`
 - エージェント権限ポリシー（許可 / 禁止コマンド）: `@docs/agent_permissions.md`
-- アーキテクチャ規約: `@src/AGENTS.md`
-- DB 規約（Prisma 採用時）: `@prisma/AGENTS.md`
+- アーキテクチャ規約: `@apps/frontend/AGENTS.md` / `@apps/backend/AGENTS.md`
+- D1 マイグレーションの手順: `@apps/backend/migrations/README.md`
 - 図（mermaid）の作成手順: `@docs/diagrams.md`
 - スキルの一覧と追加手順: `@docs/skills/README.md`
 

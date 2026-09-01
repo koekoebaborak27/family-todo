@@ -23,7 +23,7 @@
 | 区分 | 進捗 |
 | --- | --- |
 | 要件定義（未決事項の確定） | 8 / 8（完了） |
-| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件 完了、開発環境構築以降 未着手 |
+| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築 完了、実装以降 未着手 |
 
 ## 次にやること
 
@@ -32,6 +32,9 @@
 ```powershell
 git log --oneline -1     # 現在のコミット
 git status --porcelain   # 未コミット差分がないか確認
+pnpm install
+pnpm dev:backend          # 別ターミナルで: http://localhost:8787
+pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 ```
 
 - [x] 1. [要件定義書](../specs/01_requirements/family-todo/01_家族todo共有アプリ.md)の「17. 未決事項」を確定させた（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-要件定義の未決事項8件を確定)
@@ -42,7 +45,8 @@ git status --porcelain   # 未コミット差分がないか確認
 - [x] 6. Web Push（VAPID）のライブラリが Workers ランタイムで動くかを検証した（動いた）（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-インフラ関連の技術検証3件を実施)
 - [x] 7. 期限接近・期限超過の通知を送る定期実行の間隔を決めた（15分おき）（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-インフラ関連の技術検証3件を実施)
 - [x] 8. 画面・API・DBの詳細設計を行った（繰り返しToDoの期限計算・通知バッチ処理・ログインセッション管理の3件）（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面apidbの詳細設計3件を作成)
-- [ ] 9. 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）
+- [x] 9. 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-開発環境を構築nextjs--express--cloudflare-d1--google-oauth--web-push-の初期セットアップ)
+- [ ] 10. 実装する（最初の機能から着手する。着手時にユーザーと対象機能を確認する）
 
 ## 残っているタスク
 
@@ -57,7 +61,7 @@ git status --porcelain   # 未コミット差分がないか確認
 - [x] Web Push（VAPID）のライブラリが Workers ランタイムで動くかを検証する（動いた）（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-インフラ関連の技術検証3件を実施)
 - [x] 期限接近・期限超過の通知を送る定期実行の間隔を決める（15分おき）（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-インフラ関連の技術検証3件を実施)
 - [x] 画面・API・DB設計（詳細設計）を行う（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-画面apidbの詳細設計3件を作成)
-- [ ] 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）
+- [x] 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-開発環境を構築nextjs--express--cloudflare-d1--google-oauth--web-push-の初期セットアップ)
 - [ ] 実装する
 - [ ] 単体テストを作成・実行する
 - [ ] 結合テストを行う
@@ -70,13 +74,13 @@ git status --porcelain   # 未コミット差分がないか確認
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `main` |
-| ローカル環境 | 未構築（コードなし、ドキュメントのみ） |
+| 作業ブランチ | `feature/dev-environment-setup`（PR作成・マージ待ち。マージ後は `main`） |
+| ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」 |
 | 本番 | 未構築 |
 | 要件定義書 | 未決事項8件を含めて確定済み → [`docs/specs/01_requirements/family-todo/`](../specs/01_requirements/family-todo/README.md) |
 | 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み）。インフラ関連の技術検証3件も完了（Express・Web Push とも動作確認済み、通知の定期実行は15分おきに確定） → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |
 | 詳細設計 | 繰り返しToDoの期限計算・通知バッチ処理・ログインセッション管理の3件を作成済み。招待コード・作成者引き継ぎ・Push購読の登録失効は基本設計で十分と判断し作成していない → [`docs/specs/03_detail-design/`](../specs/03_detail-design/README.md) |
-| デザイントークン | 背景色（アイボリー系）・プライマリカラー（珊瑚）・フォント（M PLUS Rounded 1c）・角丸（16px相当）を暫定決定 → [`DESIGN.md`](../../DESIGN.md) |
+| デザイントークン | 背景色（アイボリー系）・プライマリカラー（珊瑚）・フォント（M PLUS Rounded 1c）・角丸（16px相当）を決定し、`apps/frontend/src/app/globals.css` に反映済み → [`DESIGN.md`](../../DESIGN.md) |
 
 ## 完了済みの作業
 

@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "family-todo-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // ローカル開発は `pnpm --filter backend dev`（= wrangler dev）でこのバインディングをそのまま使える。
+  // 実機の D1 を初めて用意するときは `pnpm --filter backend exec wrangler d1 create family-todo-db` を実行し、
+  // 出力された database_id を下の値へ転記する（手順の実測は docs/todo/notes/cloudflare-workers-検証.md 参照）。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "family-todo-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+
+  // 期限接近・期限超過の通知バッチ（詳細設計: docs/specs/03_detail-design/family-todo/20_通知バッチ処理.md）。
+  // 実行間隔は技術検証で15分おきに確定済み。バッチ本体（scheduled ハンドラの中身）は未実装。
+  "triggers": {
+    "crons": ["*/15 * * * *"],
+  },
+}

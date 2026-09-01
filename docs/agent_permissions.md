@@ -10,23 +10,18 @@ Claude Code / Codex / GitHub Copilot が**確認なしで実行してよいコ�
 | 依存 | `pnpm install` | ネットワークアクセスを伴うが、副作用は `node_modules/` に閉じる |
 | 検証 | `pnpm lint` / `pnpm format:check` / `pnpm typecheck` | 読み取りのみ |
 | 検証 | `pnpm test` / `pnpm test:*` | 読み取りのみ（DB を破壊しない） |
+| ビルド | `pnpm build` | `next build` / `wrangler deploy --dry-run`。ローカルの成果物のみで実機へは影響しない |
 | Git（読み取り） | `git status` / `git diff` / `git log` / `git show` / `git branch` | 読み取りのみ |
 
-プロジェクトで追加したコマンドは、この表に 1 行足してから各ツールの設定へ反映する。よく足すもの:
-
-| 分類 | コマンド例 | 備考 |
-|---|---|---|
-| ビルド | `pnpm build` | フレームワークを導入したら追加する |
-| DB（ローカル） | `docker compose -f docker/docker-compose.yml up` / `ps` / `logs` | ローカル開発 DB を Docker で動かす場合。各設定ファイルにコメントで雛形を入れてある |
-| DB（生成物のみ） | `pnpm prisma:generate` | Prisma を採用する場合 |
+プロジェクトで追加したコマンドは、この表に 1 行足してから各ツールの設定へ反映する。
 
 ## 禁止（エージェントが単独で実行してはならない）
 
 | 対象 | 理由 |
 |---|---|
-| `.env` の読み取り | 実クレデンシャルを含む。参照が必要なら `.env.example` を見る |
+| `.env` / `.dev.vars` の読み取り | 実クレデンシャルを含む。参照が必要なら `.env.example` / `.dev.vars.example`（`apps/backend/`）を見る |
 | `pnpm db:reset*` | 開発 DB を破壊する |
-| `prisma migrate reset*` | マイグレーション履歴とデータを破壊する |
+| `wrangler d1 execute * --command "DROP*"` 等、D1 のデータを破壊するコマンド | 開発・実機 DB を破壊する |
 | `git push --force*` | リモート履歴を破壊する |
 | `git reset --hard*` | 未コミットの変更を破壊する |
 

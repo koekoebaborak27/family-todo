@@ -1,56 +1,53 @@
 # はじめての方へ（かんたん版）
 
-このフォルダは、**AI（Claude Code / Codex / GitHub Copilot）と一緒に開発するための「ひな形」**です。
-新しいアプリを作るときに、このフォルダをコピーして使います。中身にアプリの機能は入っていません。
+「家族 de TODO！」は、家族間で日常のちょっとしたToDo（買い物・ゴミ出し・提出物確認・予約など）を共有・管理するスマートフォン向けPWAです。
 
-詳しい説明は [`README.md`](README.md) にあります。ここでは最初の 3 ステップだけを案内します。
+詳しい説明は [`README.md`](README.md) にあります。ここでは最初の3ステップだけを案内します。
 
-## これは何をしてくれるもの？
+## 使いはじめる3ステップ
 
-3 つの AI ツールは、それぞれ別の場所に「指示書」を置く決まりになっています。
-そのままだと同じルールを 3 回書くことになり、片方だけ古くなります。
-
-このひな形では、**ルールを 1 か所（`AGENTS.md`）にまとめ、各 AI の指示書からはそこを読ませるだけ**にしてあります。
-だから、ルールを直すときは 1 か所だけ直せば済みます。
-
-同じ考え方で、次の 2 つも 1 か所にまとめてあります。
-
-- **作業手順**（例:「TODO を更新して」と頼んだときの進め方）→ `docs/skills/` の中
-- **AI に実行を許すコマンド / 禁止するコマンド** → `docs/agent_permissions.md`
-
-## 使いはじめる 3 ステップ
-
-### 1. コピーする
-
-このフォルダをまるごと、新しい場所へコピーします（`.git` フォルダは持っていきません）。
-
-### 2. 名前とスタックを書き換える
-
-[`AGENTS.md`](AGENTS.md) の冒頭にある `<PROJECT_NAME>` などの `< >` で囲まれた部分を、これから作るアプリの内容に書き換えます。
-どこを直すかの一覧は [`README.md`](README.md) の「新規プロジェクトへのコピー方法」にあります。
-
-### 3. 動くことを確かめる
+### 1. 依存パッケージを取得する
 
 ```bash
-pnpm install && pnpm lint && pnpm typecheck && pnpm test
+pnpm install
 ```
 
-サンプルのテストが 4 件通れば準備完了です。サンプル（`src/example/`）は消してかまいません。
+### 2. 環境変数を用意する
+
+`apps/backend/.dev.vars.example` → `apps/backend/.dev.vars`、`apps/frontend/.env.local.example` → `apps/frontend/.env.local` にそれぞれコピーする。詳しくは [`README.md`](README.md#セットアップ) の「セットアップ」を参照。
+
+### 3. 起動する
+
+```bash
+pnpm dev:backend    # http://localhost:8787
+pnpm dev:frontend   # http://localhost:3000
+```
 
 ## よく使うコマンド
 
 ```
 pnpm install        # 必要な部品をそろえる
-pnpm lint           # 書き方のチェック
-pnpm typecheck      # 型のチェック
-pnpm test           # テストの実行
+pnpm dev:frontend    # 画面の開発サーバーを起動する
+pnpm dev:backend     # APIの開発サーバーを起動する
+pnpm lint            # 書き方のチェック
+pnpm typecheck       # 型のチェック
+pnpm test            # テストの実行
 ```
+
+## AIエージェントで開発する
+
+このリポジトリは Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できるように作られています。
+
+| 知りたいこと | 見る場所 |
+|---|---|
+| ルール・方針の正本 | [`AGENTS.md`](AGENTS.md) |
+| 各AIでの使い方の詳細 | [`README.md`](README.md#各-ai-での使い方) |
 
 ## 困ったときは
 
 | 知りたいこと | 見る場所 |
 |---|---|
-| このひな形の全体像・各 AI での使い方 | [`README.md`](README.md) |
+| このリポジトリの全体像 | [`README.md`](README.md) |
 | Git の使い方（変更を反映する手順） | [`docs/development/gitの操作ルール.md`](docs/development/gitの操作ルール.md) |
 | AI に何を許可しているか | [`docs/agent_permissions.md`](docs/agent_permissions.md) |
 | いま何が残っているか | [`docs/todo/TODO.md`](docs/todo/TODO.md) |

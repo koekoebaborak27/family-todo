@@ -1,0 +1,10 @@
+{
+  "name": "家族 de TODO！",
+  "short_name": "家族deTODO",
+  "description": "家族間で日常のちょっとしたToDoを共有・管理するアプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f0",
+  "theme_color": "#e8734a",
+  "icons": []
+}

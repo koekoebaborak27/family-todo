@@ -1,0 +1,18 @@
+# wrangler dev（ローカル実行）が読み込む環境変数の見本。
+# 実際の値を書いた .dev.vars はコミットしない（.gitignore で除外済み）。
+# 使い方: このファイルを .dev.vars という名前でコピーし、実値を書く。
+# 追加したら、この見本にもキーと説明を1行足すこと。
+
+# Google OAuth（認可コードをトークンに交換する側。クライアントシークレットは
+# Backendだけが持つ）。Google Cloud Console でこのアプリ用のOAuthクライアントを作って発行する。
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Frontendの「Googleでログイン」ボタンから戻ってくる先。ローカルはFrontendの起動先を指す。
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+
+# Web Push（VAPID）。使い捨てではない鍵ペアを1組作り、公開鍵はFrontend側の
+# NEXT_PUBLIC_VAPID_PUBLIC_KEY と同じ値を設定する。生成方法は
+# docs/todo/notes/cloudflare-workers-検証.md の「検証2」を参照。
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:example@example.com

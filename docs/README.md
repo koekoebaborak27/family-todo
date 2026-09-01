@@ -11,6 +11,5 @@
 | [`test/`](test/unit/spec/README.md) | 単体テスト仕様書（`unit/spec/`）と実施エビデンス（`unit/result/`） |
 | [`todo/`](todo/TODO.md) | 残タスク（`TODO.md`）+ 補足（`notes/`）+ 履歴（`history/`） |
 | [`diagrams.md`](diagrams.md) | mermaid 図の作成・更新手順 |
-| [`prisma_operations.md`](prisma_operations.md) | Prisma マイグレーションの運用（Prisma 採用時のみ。使わないなら削除する） |
 
 規約類（`AGENTS.md` / `DESIGN.md` / `REVIEW.md` / `TESTING.md`）はリポジトリ直下にある。

@@ -1,58 +1,57 @@
-# AI 開発テンプレート（ai-dev-template）
+# 家族 de TODO！
 
-**Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ようにするための、新規プロジェクト用テンプレートです。
+家族間で日常のちょっとしたToDo（買い物・ゴミ出し・提出物確認・予約など）を共有・管理するスマートフォン向けPWA。
 
-業務機能は入っていません。入っているのは「AI と一緒に開発するための土台」だけです。
+- **フロントエンド**: Next.js（PWA） — [`apps/frontend/`](apps/frontend/)
+- **バックエンド**: Express（Cloudflare Workers 上で実行、REST API） — [`apps/backend/`](apps/backend/)
+- **DB**: Cloudflare D1
+- **認証**: Googleログイン（OAuth）
+- **通知**: Web Push（VAPID）
 
-- **共通ルールの正本は 1 つ**（[`AGENTS.md`](AGENTS.md)）。各 AI の入口ファイルはそこへ委譲するだけ。
-- **作業手順（スキル）の正本も 1 つ**（[`docs/skills/`](docs/skills/README.md)）。3 ツール分の入口は「その正本を読め」と書いてあるだけ。
-- **権限ポリシー（許可・禁止コマンド）の正本も 1 つ**（[`docs/agent_permissions.md`](docs/agent_permissions.md)）。3 ツールの設定ファイルはその写し。
+pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。まだ機能の実装は始まっておらず、現時点では開発環境のひな形のみが入っている。
 
-言語・フレームワークは決め打ちしていません。TypeScript / Node.js（pnpm・Vitest・Playwright・GitHub Actions）で動く最小の土台だけが入っており、その上に好きなフレームワークを載せられます。
+このリポジトリは **Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ように作られています。詳しくは「AIエージェントによる開発」を参照。
 
-## 全体の構造
+## セットアップ
 
-```
-各AI専用の入口        CLAUDE.md / .github/copilot-instructions.md /（Codex は AGENTS.md を直読み）
-        ↓
-共通ルール            AGENTS.md（正本）+ DESIGN.md / REVIEW.md / TESTING.md / src/AGENTS.md
-        ↓
-共通スキル            docs/skills/<name>.md（正本）
-                        └ 入口: .claude/skills/ · .agents/skills/ · .github/prompts/
-        ↓
-権限ポリシー          docs/agent_permissions.md（正本）
-                        └ 写し: .claude/settings.json · .vscode/settings.json · .codex/rules/
-        ↓
-プロジェクト固有      docs/specs/（要件・設計）· docs/todo/（残タスク・履歴）
-```
-
-## 新規プロジェクトへのコピー方法
-
-1. **新しいプロジェクト用のリポジトリを作り、テンプレートの中身を持ってくる。** GitHub CLI（`gh`）を使う方法・使わない方法の両方を [`docs/development/本テンプレートPJをコピーする方法.md`](docs/development/本テンプレートPJをコピーする方法.md) にまとめてある。
-2. 次の 5 か所を書き換える。
-
-| 場所 | 直すこと |
-|---|---|
-| `AGENTS.md` 冒頭 | `<PROJECT_NAME>` / `<PROJECT_SUMMARY>` |
-| `AGENTS.md`「ポイント」 | 技術スタック（`<FRONTEND>` / `<BACKEND>` / `<DATABASE>` / `<DEPLOY_TARGET>`）・起動方法 |
-| `package.json` | `name`、そのプロジェクトで使う依存とスクリプト |
-| `docs/todo/TODO.md` | `<PROJECT_NAME>` と最初のタスク |
-| `LICENSE` | 著作権者名（公開しないなら削除してよい） |
-
-3. 使わないものを削除する。**削除したら `AGENTS.md` の構成表・`REVIEW.md` §3 の該当行も消す。**
-
-| 使わない場合                   | 消すもの                                                                                         |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| 画面を持たない（CLI / API / バッチ） | `DESIGN.md`、`e2e/`、`playwright.config.ts`、`docs/skills/playwright-evidence-test.md` と 3 つの入口 |
-| DB を使わない                 | `prisma/`、`docs/prisma_operations.md`                                                        |
-| Prisma 以外の DB アクセスを使う    | `prisma/AGENTS.md` を選んだ仕組みの規約へ書き換える                                                          |
-
-4. `src/example/` を消して、自分のコードを書き始める。
-5. `pnpm install` → `pnpm lint && pnpm typecheck && pnpm test` が通ることを確認する。
-6. 変更をコミットして push する（1 の手順で新しいリポジトリと `git remote` はすでに用意できている）。
+### 1. 依存パッケージを取得する
 
 ```bash
-pnpm install && pnpm lint && pnpm typecheck && pnpm test
+pnpm install
+```
+
+### 2. 環境変数を用意する
+
+| コピー元 | コピー先 | 内容 |
+|---|---|---|
+| [`apps/backend/.dev.vars.example`](apps/backend/.dev.vars.example) | `apps/backend/.dev.vars` | Google OAuthクライアントシークレット・VAPID鍵（Backend用） |
+| [`apps/frontend/.env.local.example`](apps/frontend/.env.local.example) | `apps/frontend/.env.local` | Google OAuthクライアントID・VAPID公開鍵（Frontend用） |
+
+Google OAuthクライアントの作り方、VAPID鍵の生成コマンドは [`docs/todo/notes/cloudflare-workers-検証.md`](docs/todo/notes/cloudflare-workers-検証.md) を参照。値を埋めなくても次の「起動する」は動く（ログイン・通知機能を使う画面を実装する段階で必要になる）。
+
+### 3. 起動する
+
+別々のターミナルで、それぞれ起動する。
+
+```bash
+pnpm dev:backend    # Express on Cloudflare Workers（wrangler dev）。http://localhost:8787
+pnpm dev:frontend   # Next.js。http://localhost:3000
+```
+
+ローカルの Cloudflare D1 は `wrangler dev` が自動で用意するため、事前準備は不要（実機の D1 を用意する手順は [`apps/backend/migrations/README.md`](apps/backend/migrations/README.md)）。
+
+## よく使うコマンド
+
+```bash
+pnpm install         # 依存パッケージの取得
+pnpm dev:frontend     # Next.js 開発サーバー
+pnpm dev:backend      # wrangler dev（Backend）
+pnpm lint             # ESLint
+pnpm format:check     # Prettier チェック
+pnpm typecheck        # 各ワークスペースの tsc --noEmit
+pnpm test             # 各ワークスペースの Vitest（単体）
+pnpm build            # 各ワークスペースのビルド確認（next build / wrangler deploy --dry-run）
+pnpm test:e2e         # Playwright（画面操作）
 ```
 
 ## 各 AI での使い方
@@ -77,29 +76,22 @@ pnpm install && pnpm lint && pnpm typecheck && pnpm test
 - カスタムエージェントは `.github/agents/`。チャット上部のドロップダウンから選びます。
 - ターミナルの自動承認は `.vscode/settings.json` の `chat.tools.terminal.autoApprove`。**`false` は「禁止」ではなく「毎回確認する」**です。
 
-## どこに何を書くか
+## ドキュメント
 
-| 書きたいこと | 書く場所 |
+| 書いてあること | 書く場所 |
 |---|---|
-| 3 ツール共通のルール・方針 | [`AGENTS.md`](AGENTS.md)（**正本**） |
+| 3 ツール共通のルール・方針（**正本**） | [`AGENTS.md`](AGENTS.md) |
 | そのツールでしか意味がない補足 | `CLAUDE.md` / `.github/copilot-instructions.md` の「〜固有」節 |
 | UI / デザイン規約 | [`DESIGN.md`](DESIGN.md) |
 | コミット / PR のレビュー観点 | [`REVIEW.md`](REVIEW.md) |
 | テストの書き方 | [`TESTING.md`](TESTING.md) |
-| `src/` の構造・依存方向 | [`src/AGENTS.md`](src/AGENTS.md) |
-| 許可・禁止コマンド | [`docs/agent_permissions.md`](docs/agent_permissions.md)（**正本**。3 つの設定ファイルへ写す） |
-| 繰り返す作業の手順 | [`docs/skills/<name>.md`](docs/skills/README.md)（**正本**。入口 3 つは薄いまま） |
-| 要件・設計 | [`docs/specs/`](docs/specs/README.md) |
+| Frontend / Backend それぞれの構造・依存方向 | [`apps/frontend/AGENTS.md`](apps/frontend/AGENTS.md) / [`apps/backend/AGENTS.md`](apps/backend/AGENTS.md) |
+| 許可・禁止コマンド（**正本**） | [`docs/agent_permissions.md`](docs/agent_permissions.md) |
+| 繰り返す作業の手順（**正本**） | [`docs/skills/<name>.md`](docs/skills/README.md) |
+| 要件・基本設計・詳細設計 | [`docs/specs/`](docs/specs/README.md) |
 | 残タスク・履歴 | [`docs/todo/`](docs/todo/TODO.md) |
 
 **同じルールを 2 か所に書かないこと。** 迷ったら `AGENTS.md` に書き、他からはリンクします。
-
-## スキルを追加する
-
-手順は [`docs/skills/README.md`](docs/skills/README.md)「新しいスキルを追加する手順」にあります。要点は 2 つだけです。
-
-1. 手順の正本は `docs/skills/<name>.md` に **1 つだけ**置く。
-2. 3 ツールの入口（`.claude/skills/` / `.agents/skills/` / `.github/prompts/`）は、その正本を読ませる 3〜5 行にとどめる。
 
 ## 同梱しているスキル
 
@@ -111,17 +103,21 @@ pnpm install && pnpm lint && pnpm typecheck && pnpm test
 | `create-vitest-test` | Vitest の単体テストを書き、`pnpm test` が通るまで直す |
 | `playwright-evidence-test` | 仕様書どおりに画面を操作し、スクリーンショットと DB 状態をエビデンスとして残す |
 
-## よく使うコマンド
+## CI（GitHub Actions）
 
-```
-pnpm install        # 依存パッケージの取得
-pnpm lint           # ESLint
-pnpm format:check   # Prettier チェック
-pnpm typecheck      # tsc --noEmit
-pnpm test           # Vitest（単体）
-pnpm test:e2e       # Playwright（画面操作）
-```
+`.github/workflows/ci.yml` で、PR・`main` への push のたびに次を実行する（`*.md` / `docs/` のみの変更は起動しない）。
+
+1. `pnpm install --frozen-lockfile`
+2. `pnpm lint`
+3. `pnpm format:check`
+4. `pnpm typecheck`
+5. `pnpm test`
+6. `pnpm build`
+
+## 本番デプロイ
+
+未着手。デプロイ先は Cloudflare。Backend は Cloudflare Workers 上で Express を動かす方式で確定（技術検証・環境構築で動作確認済み）。Frontend の具体的なデプロイ方式（Pages / Workers Static Assets 等）は未定。詳細は [`docs/todo/TODO.md`](docs/todo/TODO.md) を参照。
 
 ## ライセンス
 
-MIT（[`LICENSE`](LICENSE)）。コピーして自由に使ってください。
+MIT（[`LICENSE`](LICENSE)）。

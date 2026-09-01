@@ -9,7 +9,24 @@ const config = [
   // Prettier と競合する整形系ルールを無効化（format は Prettier に一任）
   prettier,
   {
-    ignores: ["node_modules/**", "coverage/**", "playwright.config.ts", "e2e/**"],
+    rules: {
+      // 意図的に使わない引数は `_` 接頭辞で許可する（例: Workers の scheduled ハンドラの未使用引数）。
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/coverage/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/.wrangler/**",
+      "playwright.config.ts",
+      "e2e/**",
+      // apps/frontend は Next.js 公式の eslint 設定（next lint 相当）を自分の
+      // package.json の lint スクリプトで個別に実行する（ルートの汎用設定は対象外にする）。
+      "apps/frontend/**",
+    ],
   },
 ];
 

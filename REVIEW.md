@@ -1,7 +1,7 @@
 # REVIEW.md — コミット / PR レビュー観点
 
 > このリポジトリのレビュー観点（正本）。**コミット単位**と**PR単位**の両方をカバーする。
-> 方針の正本は `AGENTS.md`（および `src/AGENTS.md` / `prisma/AGENTS.md`）。本書はレビュー手順に絞る。
+> 方針の正本は `AGENTS.md`（および `apps/frontend/AGENTS.md` / `apps/backend/AGENTS.md`）。本書はレビュー手順に絞る。
 
 ## 1. コミット単位の観点
 
@@ -30,8 +30,7 @@
 > ルール本文は各正本に置く。ここは「確認すべき観点 + 参照先」に留め、規約の二重記載を避ける。
 > **下の項目はテンプレート既定の例。** 採用しない規約の行は削除し、プロジェクトで決めた観点を足すこと。
 
-- [ ] **依存方向**: `app → modules → shared` の一方向を守れているか（→ `src/AGENTS.md`）
-- [ ] **server-only**: サーバ専用コードにマーカーが付き、クライアントへ混入していないか（→ `src/AGENTS.md`）
-- [ ] **DB 命名規約**: 新規カラムが規約どおりか（→ `prisma/AGENTS.md`。Prisma 採用時）
-- [ ] **ログ境界**: 業務コードに `try/catch`・ログがなく、入口ラッパー経由で `throw new AppError(...)` のみか（→ `src/AGENTS.md`）
+- [ ] **依存方向**: `app → modules → shared` の一方向を守れているか（→ `apps/frontend/AGENTS.md` / `apps/backend/AGENTS.md`）
+- [ ] **server-only**: サーバ専用コードにマーカーが付き、クライアントへ混入していないか（→ `apps/frontend/AGENTS.md`）
+- [ ] **ログ境界**: 業務コードに `try/catch`・ログがなく、入口ラッパー経由で `throw new AppError(...)` のみか（→ `apps/frontend/AGENTS.md` / `apps/backend/AGENTS.md`）
 - [ ] **UI / 一覧**: `DESIGN.md` に従っているか（一覧/テーブル規約を含む → `DESIGN.md`。画面を持つプロジェクトのみ）

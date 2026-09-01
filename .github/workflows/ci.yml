@@ -19,21 +19,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
 
-    # DB を使うプロジェクトでは、次のブロックを有効にしてテスト用の DB を起動する。
-    # services:
-    #   postgres:
-    #     image: postgres:16
-    #     env:
-    #       POSTGRES_USER: app
-    #       POSTGRES_PASSWORD: password
-    #       POSTGRES_DB: app_db
-    #     ports:
-    #       - 5432:5432
-    #     options: >-
-    #       --health-cmd "pg_isready -U app -d app_db"
-    #       --health-interval 5s
-    #       --health-timeout 5s
-    #       --health-retries 10
+    # D1（SQLite互換）はサーバープロセスを必要としないため、テスト用DBサービスは不要。
+    # スキーマ検証は wrangler d1 migrations apply --local（マイグレーション追加後に有効化する）で行う。
 
     steps:
       - uses: actions/checkout@v7
@@ -57,24 +44,11 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      # Prisma を採用する場合は、型を参照する Typecheck / Test より前に Client を生成する。
-      # （pnpm ストアがキャッシュヒットすると @prisma/client の postinstall が走らず、
-      #   生成前に tsc すると型解決に失敗する）
-      # - name: Prisma validate
-      #   run: pnpm exec prisma validate
-      # - name: Prisma generate
-      #   run: pnpm exec prisma generate
-
       - name: Typecheck
         run: pnpm typecheck
-
-      # DB を使う場合は、0 からスキーマを再現できることをここで検証する。
-      # - name: Apply migrations
-      #   run: pnpm exec prisma migrate deploy
 
       - name: Test
         run: pnpm test
 
-      # フレームワークを導入して package.json に build を追加したら、次を有効にする。
-      # - name: Build
-      #   run: pnpm build
+      - name: Build
+        run: pnpm build
