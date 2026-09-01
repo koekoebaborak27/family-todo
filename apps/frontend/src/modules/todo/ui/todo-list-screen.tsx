@@ -7,6 +7,7 @@ import { Menu, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { fetchMe, logout } from "@/modules/auth";
 import { FamilyError, fetchMyFamily } from "@/modules/family";
+import { IosInstallBanner } from "@/modules/ios-install-guide";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -251,6 +252,8 @@ export function TodoListScreen() {
           </DropdownMenu>
         </div>
       </header>
+
+      <IosInstallBanner />
 
       <div className="flex flex-col gap-3 px-4 py-3">
         <Tabs value={statusTab} onValueChange={(value) => setStatusTab(value as StatusTab)}>

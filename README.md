@@ -25,6 +25,7 @@ pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packa
 | ToDo詳細 | `/todos/:id` | ToDoの内容確認・完了状態の切り替え・編集/削除・コメントの追加/編集/削除を行う → [`docs/specs/02_basic-design/family-todo/18_ToDo詳細.md`](docs/specs/02_basic-design/family-todo/18_ToDo詳細.md) |
 | 家族グループ設定 | `/family/settings` | メンバーの確認、非登録メンバーの追加・削除、招待、退出、作成者によるグループ削除を行う → [`docs/specs/02_basic-design/family-todo/20_家族グループ設定.md`](docs/specs/02_basic-design/family-todo/20_家族グループ設定.md) |
 | 個人設定 | `/settings` | 表示名・通知・期限の基準時刻・Push通知の端末状態を設定し、ログアウトする → [`docs/specs/02_basic-design/family-todo/22_個人設定.md`](docs/specs/02_basic-design/family-todo/22_個人設定.md) |
+| iOSインストール案内 | 独立ルートなし（ToDo一覧・家族グループ作成/参加画面に重ねて表示） | ホーム画面未追加のiOS Safariに、追加のしかたをバナーとDrawerで案内する → [`docs/specs/02_basic-design/family-todo/24_iOSインストール案内.md`](docs/specs/02_basic-design/family-todo/24_iOSインストール案内.md) |
 
 ## セットアップ
 
