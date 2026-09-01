@@ -8,7 +8,7 @@
 - **認証**: Googleログイン（OAuth）
 - **通知**: Web Push（VAPID）
 
-pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は1画面（ログイン）から実装を始めた段階で、残りの画面は順次実装していく。
+pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は8画面中2画面（ログイン・家族グループ作成/参加）まで実装が進んだ段階で、残りの画面は順次実装していく。
 
 このリポジトリは **Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ように作られています。詳しくは「AIエージェントによる開発」を参照。
 
@@ -19,6 +19,7 @@ pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packa
 | 画面 | ルート | 内容 |
 |---|---|---|
 | ログイン | `/`（ログイン後の戻り先: `/auth/callback`） | Googleログイン。所属グループの有無で遷移先を振り分ける → [`docs/specs/02_basic-design/family-todo/10_ログイン.md`](docs/specs/02_basic-design/family-todo/10_ログイン.md) |
+| 家族グループ作成・参加 | `/family/setup`（招待リンクの入口: `/join`） | グループ未所属ユーザーが新規作成するか招待コードで参加する → [`docs/specs/02_basic-design/family-todo/12_家族グループ作成・参加.md`](docs/specs/02_basic-design/family-todo/12_家族グループ作成・参加.md) |
 
 ## セットアップ
 

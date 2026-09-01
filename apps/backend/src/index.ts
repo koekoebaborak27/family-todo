@@ -5,6 +5,7 @@ import type { ApiErrorBody } from "shared";
 import type { Env } from "./env";
 import { authRouter, verifySession } from "./modules/auth";
 import type { AuthContext } from "./modules/auth";
+import { familyRouter } from "./modules/family";
 import { AppError } from "./shared/errors/app-error";
 import { getSessionIdFromCookieHeader } from "./shared/http/session-cookie";
 
@@ -45,6 +46,9 @@ app.get("/api/v1/health", (_req, res) => {
 app.use("/api/v1/auth/me", requireAuth);
 app.use("/api/v1/auth/logout", requireAuth);
 app.use("/api/v1", authRouter);
+
+app.use("/api/v1/families", requireAuth);
+app.use("/api/v1", familyRouter);
 
 // エラー整形とログ出力は、業務コードではなくここで1回だけ行う
 // （apps/backend/AGENTS.md「観測性（ログ）」）。

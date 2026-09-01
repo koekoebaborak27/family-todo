@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
 import { fetchMe, type LoginError } from "../api-client";
-import { buildGoogleAuthUrl, getPostLoginPath } from "../service";
+import { buildGoogleAuthUrl, getPostLoginPath, storePendingInviteCode } from "../service";
 import { GoogleIcon } from "./google-icon";
 
 type Phase = "checking" | "ready" | "redirecting";
@@ -25,7 +25,12 @@ export function LoginScreen() {
     // URLの書き換え（history.replaceState）は、この実行がキャンセルされていないと分かって
     // からfetchMeのthen内で行う。開発時のStrict Mode（mount→unmount→再mount）で先に
     // 消費・除去されてしまい、生き残った側が読めなくなる事故を避けるため。
-    const errorFromCallback = new URLSearchParams(window.location.search).get("error");
+    const searchParams = new URLSearchParams(window.location.search);
+    const errorFromCallback = searchParams.get("error");
+    // 招待リンク（/join?code=XXXXXXXX）が未ログインだった場合、ここへ ?inviteCode=XXXXXXXX
+    // 付きで戻ってくる（modules/family の JoinRedirectScreen）。Google認可画面を挟んでも
+    // 引き継げるよう、ボタンを押す前にsessionStorageへ控えておく。
+    const inviteCode = searchParams.get("inviteCode");
 
     fetchMe()
       .then((result) => {
@@ -33,8 +38,11 @@ export function LoginScreen() {
           return;
         }
         if (result.authenticated) {
-          router.replace(getPostLoginPath(result.hasFamily));
+          router.replace(getPostLoginPath(result.hasFamily, inviteCode));
           return;
+        }
+        if (inviteCode) {
+          storePendingInviteCode(inviteCode);
         }
         if (errorFromCallback) {
           setErrorMessage(errorFromCallback);

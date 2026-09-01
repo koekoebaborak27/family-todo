@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { buildGoogleAuthUrl, consumeOAuthState, getPostLoginPath } from "./service";
+import {
+  buildGoogleAuthUrl,
+  consumeOAuthState,
+  consumePendingInviteCode,
+  getPostLoginPath,
+  storePendingInviteCode,
+} from "./service";
 
 /**
  * 対象: auth/service
  * 目的: Google認可URLの組み立て・stateの一致確認（OAuthのCSRF対策）・
- *       ログイン成功後の遷移先振り分けを担保する。
+ *       ログイン成功後の遷移先振り分け（招待リンク経由の引き継ぎ含む）を担保する。
  */
 
 beforeEach(() => {
@@ -61,5 +67,32 @@ describe("auth/service getPostLoginPath", () => {
 
   it("所属グループが無ければ /family/setup を返す", () => {
     expect(getPostLoginPath(false)).toBe("/family/setup");
+  });
+
+  describe("招待コードを引き継いでいるとき", () => {
+    it("所属グループが無ければ、招待コード付きの /family/setup を返す", () => {
+      expect(getPostLoginPath(false, "A3F9K2QP")).toBe("/family/setup?code=A3F9K2QP");
+    });
+
+    it("すでに所属グループがあれば、招待コードを無視して /todos を返す", () => {
+      expect(getPostLoginPath(true, "A3F9K2QP")).toBe("/todos");
+    });
+  });
+});
+
+describe("auth/service storePendingInviteCode・consumePendingInviteCode", () => {
+  it("保存した招待コードを取り出せる", () => {
+    storePendingInviteCode("A3F9K2QP");
+    expect(consumePendingInviteCode()).toBe("A3F9K2QP");
+  });
+
+  it("取り出した後は削除され、以降はnullを返す", () => {
+    storePendingInviteCode("A3F9K2QP");
+    consumePendingInviteCode();
+    expect(consumePendingInviteCode()).toBeNull();
+  });
+
+  it("保存していなければnullを返す", () => {
+    expect(consumePendingInviteCode()).toBeNull();
   });
 });
