@@ -4,3 +4,13 @@ export interface FamilySummary {
   id: number;
   name: string;
 }
+
+// GET /families/me の応答。
+export interface FamilyDetail {
+  id: number;
+  name: string;
+  inviteCode: string;
+  inviteCodeExpiresAt: string;
+  createdByUserId: number;
+  createdAt: string;
+}

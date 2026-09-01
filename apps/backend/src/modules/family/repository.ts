@@ -41,3 +41,23 @@ export async function createFamilyRow(params: {
 export async function setUserFamilyId(userId: number, familyId: number): Promise<void> {
   await getDb().prepare("UPDATE users SET family_id = ? WHERE id = ?").bind(familyId, userId).run();
 }
+
+export interface FamilyDetailRow {
+  id: number;
+  name: string;
+  invite_code: string;
+  invite_code_expires_at: string;
+  created_by_user_id: number;
+  created_at: string;
+}
+
+// idで家族グループの詳細を取得する。GET /families/me で使う。
+export async function findFamilyById(id: number): Promise<FamilyDetailRow | null> {
+  const row = await getDb()
+    .prepare(
+      "SELECT id, name, invite_code, invite_code_expires_at, created_by_user_id, created_at FROM families WHERE id = ?",
+    )
+    .bind(id)
+    .first<FamilyDetailRow>();
+  return row ?? null;
+}

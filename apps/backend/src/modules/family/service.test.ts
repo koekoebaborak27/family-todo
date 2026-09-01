@@ -1,16 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthenticatedUser } from "../auth";
-import { createFamilyRow, findFamilyByInviteCode, setUserFamilyId } from "./repository";
-import { createFamily, joinFamily } from "./service";
+import {
+  createFamilyRow,
+  findFamilyById,
+  findFamilyByInviteCode,
+  setUserFamilyId,
+} from "./repository";
+import { createFamily, getMyFamily, joinFamily } from "./service";
 
 /**
  * 対象: family/service
  * 目的: 家族グループの新規作成・招待コード参加の業務ルール（未所属ユーザーのみ実行可能・
- *       招待コードの重複回避・有効期限切れの判定）を担保する。
+ *       招待コードの重複回避・有効期限切れの判定）と、所属グループ情報取得（グループ未所属・
+ *       家族グループが見つからない場合の扱い）を担保する。
  */
 
 vi.mock("./repository", () => ({
   findFamilyByInviteCode: vi.fn(),
+  findFamilyById: vi.fn(),
   createFamilyRow: vi.fn(),
   setUserFamilyId: vi.fn(),
 }));
@@ -120,6 +127,48 @@ describe("family/service joinFamily", () => {
         code: "CONFLICT",
       });
       expect(findFamilyByInviteCode).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe("family/service getMyFamily", () => {
+  describe("グループ未所属のとき", () => {
+    it("AppError(FORBIDDEN) を投げ、repositoryは呼ばない", async () => {
+      await expect(getMyFamily(unaffiliatedUser)).rejects.toMatchObject({ code: "FORBIDDEN" });
+      expect(findFamilyById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("所属しているはずの家族グループが見つからないとき", () => {
+    it("AppError(NOT_FOUND) を投げる", async () => {
+      vi.mocked(findFamilyById).mockResolvedValue(null);
+
+      await expect(getMyFamily(affiliatedUser)).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+  });
+
+  describe("正常系", () => {
+    it("所属している家族グループの詳細を返す", async () => {
+      vi.mocked(findFamilyById).mockResolvedValue({
+        id: 99,
+        name: "山田家",
+        invite_code: "A3F9K2QP",
+        invite_code_expires_at: "2099-01-01T00:00:00.000Z",
+        created_by_user_id: 2,
+        created_at: "2026-01-01T00:00:00.000Z",
+      });
+
+      const result = await getMyFamily(affiliatedUser);
+
+      expect(findFamilyById).toHaveBeenCalledWith(99);
+      expect(result).toEqual({
+        id: 99,
+        name: "山田家",
+        inviteCode: "A3F9K2QP",
+        inviteCodeExpiresAt: "2099-01-01T00:00:00.000Z",
+        createdByUserId: 2,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      });
     });
   });
 });

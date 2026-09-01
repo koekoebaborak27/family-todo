@@ -5,7 +5,10 @@ import type { ApiErrorBody } from "shared";
 import type { Env } from "./env";
 import { authRouter, verifySession } from "./modules/auth";
 import type { AuthContext } from "./modules/auth";
+import { categoryRouter } from "./modules/category";
 import { familyRouter } from "./modules/family";
+import { pushSubscriptionRouter } from "./modules/push-subscription";
+import { todoRouter } from "./modules/todo";
 import { AppError } from "./shared/errors/app-error";
 import { getSessionIdFromCookieHeader } from "./shared/http/session-cookie";
 
@@ -49,6 +52,15 @@ app.use("/api/v1", authRouter);
 
 app.use("/api/v1/families", requireAuth);
 app.use("/api/v1", familyRouter);
+
+app.use("/api/v1/categories", requireAuth);
+app.use("/api/v1", categoryRouter);
+
+app.use("/api/v1/todos", requireAuth);
+app.use("/api/v1", todoRouter);
+
+app.use("/api/v1/push-subscriptions", requireAuth);
+app.use("/api/v1", pushSubscriptionRouter);
 
 // エラー整形とログ出力は、業務コードではなくここで1回だけ行う
 // （apps/backend/AGENTS.md「観測性（ログ）」）。
