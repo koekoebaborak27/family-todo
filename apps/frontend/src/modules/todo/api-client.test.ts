@@ -1,11 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   completeTodo,
+  createTodo,
   fetchCategories,
+  fetchFamilyMembers,
+  fetchTodo,
+  fetchUnregisteredMembers,
   fetchTodos,
   incompleteTodo,
   registerPushSubscription,
+  replaceAssignees,
   TodoError,
+  updateTodo,
 } from "./api-client";
 import { TODO_ERROR_MESSAGES } from "./service";
 
@@ -252,5 +258,70 @@ describe("todo/api-client TodoError", () => {
     const error = new TodoError("テストメッセージ", "server");
     expect(error.message).toBe("テストメッセージ");
     expect(error.kind).toBe("server");
+  });
+});
+
+const todoInput = {
+  title: "牛乳を買う",
+  memo: null,
+  categoryId: 6,
+  priority: "medium" as const,
+  dueAt: null,
+  dueHasTime: false,
+  recurrenceType: "none" as const,
+  recurrenceConfig: null,
+};
+
+describe("todo/api-client ToDo追加編集API", () => {
+  describe("担当者の選択肢を取得するとき", () => {
+    it("登録ユーザーと非登録メンバーをそれぞれ返す", async () => {
+      mockFetchOnce({ json: async () => [{ id: 1, displayName: "太郎" }] });
+      await expect(fetchFamilyMembers()).resolves.toEqual([{ id: 1, displayName: "太郎" }]);
+      mockFetchOnce({ json: async () => [{ id: 2, name: "花子" }] });
+      await expect(fetchUnregisteredMembers()).resolves.toEqual([{ id: 2, name: "花子" }]);
+    });
+  });
+
+  describe("ToDoを追加するとき", () => {
+    it("POSTで入力を送り、作成IDを返す", async () => {
+      mockFetchOnce({ status: 201, json: async () => ({ id: 9 }) });
+      await expect(
+        createTodo({ ...todoInput, userIds: [], unregisteredMemberIds: [], followerUserIds: [] }),
+      ).resolves.toBe(9);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/todos"),
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+  });
+
+  describe("ToDoを更新するとき", () => {
+    it("PATCHと担当者置換のPUTを正しいURLで送る", async () => {
+      mockFetchOnce({ status: 204 });
+      await expect(updateTodo(9, todoInput)).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/todos/9"),
+        expect.objectContaining({ method: "PATCH" }),
+      );
+      mockFetchOnce({ status: 204 });
+      await expect(
+        replaceAssignees(9, { userIds: [1], unregisteredMemberIds: [], followerUserIds: [] }),
+      ).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/todos/9/assignees"),
+        expect.objectContaining({ method: "PUT" }),
+      );
+    });
+  });
+
+  describe("編集対象を取得するとき", () => {
+    it("404ならkind: notFoundのTodoErrorを投げる", async () => {
+      mockFetchOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ error: { message: "このToDoは削除されています。" } }),
+      });
+      await expect(fetchTodo(9)).rejects.toMatchObject({ kind: "notFound" });
+    });
   });
 });

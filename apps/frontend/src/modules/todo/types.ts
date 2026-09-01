@@ -31,6 +31,46 @@ export interface Category {
   name: string;
 }
 
+// ToDo追加・編集画面で担当者として選べる、ログイン済みの家族。
+export interface FamilyMember {
+  id: number;
+  displayName: string;
+}
+
+// ToDo追加・編集画面で担当者として選べる、ログインしない家族。
+export interface UnregisteredMember {
+  id: number;
+  name: string;
+}
+
+// 編集画面の初期値に使うToDoの詳細。
+export interface TodoDetail extends Omit<
+  Todo,
+  "commentCount" | "completedByDisplayName" | "completedAt" | "createdAt" | "assignees"
+> {
+  recurrenceConfig: { weekdays: number[] } | { day: number } | null;
+  assignees: (TodoAssignee & { isFollower: boolean })[];
+}
+
+// ToDo作成・更新でAPIへ送る入力。
+export interface TodoInput {
+  title: string;
+  memo: string | null;
+  categoryId: number;
+  priority: TodoPriority;
+  dueAt: string | null;
+  dueHasTime: boolean;
+  recurrenceType: RecurrenceType;
+  recurrenceConfig: { weekdays: number[] } | { day: number } | null;
+}
+
+// ToDoの担当者を丸ごと置き換える入力。
+export interface AssigneeInput {
+  userIds: number[];
+  unregisteredMemberIds: number[];
+  followerUserIds: number[];
+}
+
 // 完了状態タブ。
 export type StatusTab = "incomplete" | "completed";
 

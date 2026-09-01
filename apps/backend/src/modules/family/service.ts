@@ -5,6 +5,8 @@ import {
   createFamilyRow,
   findFamilyByInviteCode,
   findFamilyById,
+  listFamilyMembers,
+  listUnregisteredFamilyMembers,
   setUserFamilyId,
 } from "./repository";
 import type { FamilyDetail, FamilySummary } from "./types";
@@ -19,6 +21,23 @@ function generateInviteCode(): string {
   const bytes = new Uint8Array(INVITE_CODE_LENGTH);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (byte) => INVITE_CODE_CHARS[byte % INVITE_CODE_CHARS.length]).join("");
+}
+
+// 自分の家族グループで担当者に選べる、登録ユーザーを返す。
+export async function getMyFamilyMembers(
+  user: AuthenticatedUser,
+): Promise<{ id: number; displayName: string }[]> {
+  const familyId = ensureFamilyMembership(user);
+  const members = await listFamilyMembers(familyId);
+  return members.map((member) => ({ id: member.id, displayName: member.display_name }));
+}
+
+// 自分の家族グループで担当者に選べる、非登録メンバーを返す。
+export async function getMyUnregisteredFamilyMembers(
+  user: AuthenticatedUser,
+): Promise<{ id: number; name: string }[]> {
+  const familyId = ensureFamilyMembership(user);
+  return listUnregisteredFamilyMembers(familyId);
 }
 
 // 半角英数字8桁（大文字）の招待コードを、既存のコードと重複しないものが

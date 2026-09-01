@@ -1,7 +1,13 @@
 import { Router } from "express";
 import type { AuthContext } from "../auth";
 import { Errors } from "../../shared/errors/app-error";
-import { createFamily, getMyFamily, joinFamily } from "./service";
+import {
+  createFamily,
+  getMyFamily,
+  getMyFamilyMembers,
+  getMyUnregisteredFamilyMembers,
+  joinFamily,
+} from "./service";
 import { createFamilySchema, joinFamilySchema } from "./validation";
 
 export const familyRouter = Router();
@@ -41,4 +47,18 @@ familyRouter.get("/families/me", async (_req, res) => {
   const { user } = res.locals.authContext as AuthContext;
   const family = await getMyFamily(user);
   res.status(200).json(family);
+});
+
+// ToDoの担当者・フォロー役に選べる登録ユーザーを返す。
+familyRouter.get("/families/me/members", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  const members = await getMyFamilyMembers(user);
+  res.status(200).json(members);
+});
+
+// ToDoの担当者に選べる、ログインしないメンバーを返す。
+familyRouter.get("/families/me/unregistered-members", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  const members = await getMyUnregisteredFamilyMembers(user);
+  res.status(200).json(members);
 });
