@@ -77,7 +77,7 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `feature/todo-list`（`main` から作成。`main` にはPR #3＝家族グループ作成・参加機能がマージ済み。コミット・PR作成はユーザー承認待ち） |
+| 作業ブランチ | `feature/todo-list`（`main` から作成。`main` にはPR #3＝家族グループ作成・参加機能がマージ済み。[PR #4](https://github.com/koekoebaborak27/family-todo/pull/4)＝ToDo一覧機能を作成・push済み、マージ待ち） |
 | ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
 | 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) |
 | 本番 | 未構築 |
