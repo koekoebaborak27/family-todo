@@ -7,16 +7,12 @@ import { buildCreatedToastMessage, buildJoinedToastMessage } from "./service";
  */
 describe("family/service buildCreatedToastMessage", () => {
   it("家族名を埋め込んだ作成完了メッセージを返す", () => {
-    expect(buildCreatedToastMessage("山田家")).toBe(
-      "家族グループ「山田家」を作成しました。",
-    );
+    expect(buildCreatedToastMessage("山田家")).toBe("家族グループ「山田家」を作成しました。");
   });
 });
 
 describe("family/service buildJoinedToastMessage", () => {
   it("家族名を埋め込んだ参加完了メッセージを返す", () => {
-    expect(buildJoinedToastMessage("山田家")).toBe(
-      "家族グループ「山田家」に参加しました。",
-    );
+    expect(buildJoinedToastMessage("山田家")).toBe("家族グループ「山田家」に参加しました。");
   });
 });
