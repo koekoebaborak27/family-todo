@@ -1,8 +1,21 @@
 import { Router } from "express";
 import { Errors } from "../../shared/errors/app-error";
 import type { AuthContext } from "../auth";
-import { completeTodo, incompleteTodo, listTodos } from "./service";
-import { listTodosQuerySchema } from "./validation";
+import {
+  completeTodo,
+  createTodo,
+  getTodo,
+  incompleteTodo,
+  listTodos,
+  updateTodo,
+  updateTodoAssignees,
+} from "./service";
+import {
+  createTodoSchema,
+  listTodosQuerySchema,
+  replaceAssigneesSchema,
+  updateTodoSchema,
+} from "./validation";
 
 export const todoRouter = Router();
 
@@ -30,6 +43,52 @@ function parseTodoId(rawId: string): number {
   }
   return id;
 }
+
+// ToDoを1件追加する。担当者も同じリクエストの内容で保存する。
+todoRouter.post("/todos", async (req, res) => {
+  const parsed = createTodoSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  }
+  const { user } = res.locals.authContext as AuthContext;
+  const todo = await createTodo(parsed.data, user);
+  res.status(201).json(todo);
+});
+
+// ToDoの編集画面に必要な内容を返す。
+todoRouter.get("/todos/:id", async (req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  const todo = await getTodo(parseTodoId(req.params.id), user);
+  res.status(200).json(todo);
+});
+
+// ToDo本体を更新する。担当者はPUT /todos/:id/assigneesで置き換える。
+todoRouter.patch("/todos/:id", async (req, res) => {
+  const parsed = updateTodoSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  }
+  const { user } = res.locals.authContext as AuthContext;
+  await updateTodo(parseTodoId(req.params.id), parsed.data, user);
+  res.status(204).end();
+});
+
+// ToDoの担当者を丸ごと置き換える。
+todoRouter.put("/todos/:id/assignees", async (req, res) => {
+  const parsed = replaceAssigneesSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  }
+  const { user } = res.locals.authContext as AuthContext;
+  await updateTodoAssignees(parseTodoId(req.params.id), parsed.data, user);
+  res.status(204).end();
+});
 
 todoRouter.post("/todos/:id/complete", async (req, res) => {
   const todoId = parseTodoId(req.params.id);

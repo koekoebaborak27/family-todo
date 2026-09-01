@@ -51,6 +51,30 @@ export interface FamilyDetailRow {
   created_at: string;
 }
 
+// 指定した家族グループに所属する、ログイン可能なメンバーを取得する。
+// ToDoの担当者・通知を受け取る家族の選択肢に使う。
+export async function listFamilyMembers(
+  familyId: number,
+): Promise<{ id: number; display_name: string }[]> {
+  const { results } = await getDb()
+    .prepare("SELECT id, display_name FROM users WHERE family_id = ? ORDER BY id")
+    .bind(familyId)
+    .all<{ id: number; display_name: string }>();
+  return results;
+}
+
+// 指定した家族グループに登録済みの、ログインしないメンバーを取得する。
+// ToDoの担当者選択で、登録ユーザーとは分けて表示する。
+export async function listUnregisteredFamilyMembers(
+  familyId: number,
+): Promise<{ id: number; name: string }[]> {
+  const { results } = await getDb()
+    .prepare("SELECT id, name FROM unregistered_members WHERE family_id = ? ORDER BY id")
+    .bind(familyId)
+    .all<{ id: number; name: string }>();
+  return results;
+}
+
 // idで家族グループの詳細を取得する。GET /families/me で使う。
 export async function findFamilyById(id: number): Promise<FamilyDetailRow | null> {
   const row = await getDb()

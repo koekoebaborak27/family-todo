@@ -30,3 +30,12 @@ export interface TodoSummary {
   // 並び替えロジックが使う（docs/specs/02_basic-design/family-todo/14_ToDo一覧.md「3.4」）。
   createdAt: string;
 }
+
+// GET /todos/:id の応答。編集画面の初期値に使う。
+export interface TodoDetail extends Omit<
+  TodoSummary,
+  "commentCount" | "completedByDisplayName" | "completedAt" | "createdAt"
+> {
+  recurrenceConfig: { weekdays: number[] } | { day: number } | null;
+  assignees: (TodoAssigneeSummary & { isFollower: boolean })[];
+}
