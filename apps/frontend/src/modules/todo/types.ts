@@ -44,12 +44,20 @@ export interface UnregisteredMember {
 }
 
 // 編集画面の初期値に使うToDoの詳細。
-export interface TodoDetail extends Omit<
-  Todo,
-  "commentCount" | "completedByDisplayName" | "completedAt" | "createdAt" | "assignees"
-> {
+export interface TodoDetail extends Todo {
   recurrenceConfig: { weekdays: number[] } | { day: number } | null;
   assignees: (TodoAssignee & { isFollower: boolean })[];
+  createdByDisplayName: string;
+  comments: TodoComment[];
+}
+
+// ToDo詳細画面に表示するコメント1件分。
+export interface TodoComment {
+  id: number;
+  body: string;
+  userDisplayName: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ToDo作成・更新でAPIへ送る入力。

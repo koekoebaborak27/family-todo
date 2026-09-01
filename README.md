@@ -22,6 +22,7 @@ pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packa
 | 家族グループ作成・参加 | `/family/setup`（招待リンクの入口: `/join`） | グループ未所属ユーザーが新規作成するか招待コードで参加する → [`docs/specs/02_basic-design/family-todo/12_家族グループ作成・参加.md`](docs/specs/02_basic-design/family-todo/12_家族グループ作成・参加.md) |
 | ToDo一覧 | `/todos` | 家族グループのToDoを完了状態タブ・並び順・カテゴリで絞り込んで表示し、完了/未完了を切り替える → [`docs/specs/02_basic-design/family-todo/14_ToDo一覧.md`](docs/specs/02_basic-design/family-todo/14_ToDo一覧.md) |
 | ToDo追加・編集 | `/todos/new`（編集: `/todos/:id/edit`） | タイトル・カテゴリ・優先度・期限・繰り返し・担当者/フォロー役を指定してToDoを保存する → [`docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md`](docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md) |
+| ToDo詳細 | `/todos/:id` | ToDoの内容確認・完了状態の切り替え・編集/削除・コメントの追加/編集/削除を行う → [`docs/specs/02_basic-design/family-todo/18_ToDo詳細.md`](docs/specs/02_basic-design/family-todo/18_ToDo詳細.md) |
 
 ## セットアップ
 

@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   completeTodo,
+  createComment,
   createTodo,
+  deleteComment,
+  deleteTodo,
   fetchCategories,
   fetchFamilyMembers,
   fetchTodo,
@@ -12,6 +15,7 @@ import {
   replaceAssignees,
   TodoError,
   updateTodo,
+  updateComment,
 } from "./api-client";
 import { TODO_ERROR_MESSAGES } from "./service";
 
@@ -322,6 +326,37 @@ describe("todo/api-client ToDo追加編集API", () => {
         json: async () => ({ error: { message: "このToDoは削除されています。" } }),
       });
       await expect(fetchTodo(9)).rejects.toMatchObject({ kind: "notFound" });
+    });
+  });
+});
+
+describe("todo/api-client ToDo詳細API", () => {
+  describe("削除・コメント操作をするとき", () => {
+    it("それぞれのURLとHTTPメソッドで送る", async () => {
+      mockFetchOnce({ status: 204 });
+      await deleteTodo(9);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/todos/9"),
+        expect.objectContaining({ method: "DELETE" }),
+      );
+      mockFetchOnce({ status: 204 });
+      await createComment(9, "確認しました");
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/todos/9/comments"),
+        expect.objectContaining({ method: "POST" }),
+      );
+      mockFetchOnce({ status: 204 });
+      await updateComment(3, "変更しました");
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/comments/3"),
+        expect.objectContaining({ method: "PATCH" }),
+      );
+      mockFetchOnce({ status: 204 });
+      await deleteComment(3);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/comments/3"),
+        expect.objectContaining({ method: "DELETE" }),
+      );
     });
   });
 });

@@ -3,18 +3,23 @@ import { Errors } from "../../shared/errors/app-error";
 import type { AuthContext } from "../auth";
 import {
   completeTodo,
+  createComment,
   createTodo,
+  deleteComment,
+  deleteTodo,
   getTodo,
   incompleteTodo,
   listTodos,
   updateTodo,
   updateTodoAssignees,
+  updateComment,
 } from "./service";
 import {
   createTodoSchema,
   listTodosQuerySchema,
   replaceAssigneesSchema,
   updateTodoSchema,
+  commentSchema,
 } from "./validation";
 
 export const todoRouter = Router();
@@ -101,5 +106,43 @@ todoRouter.post("/todos/:id/incomplete", async (req, res) => {
   const todoId = parseTodoId(req.params.id);
   const { user } = res.locals.authContext as AuthContext;
   await incompleteTodo(todoId, user);
+  res.status(204).end();
+});
+
+// ToDoを削除する。コメントと担当者も同時に削除する。
+todoRouter.delete("/todos/:id", async (req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  await deleteTodo(parseTodoId(req.params.id), user);
+  res.status(204).end();
+});
+
+// ToDoにコメントを追加する。
+todoRouter.post("/todos/:id/comments", async (req, res) => {
+  const parsed = commentSchema.safeParse(req.body);
+  if (!parsed.success)
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  const { user } = res.locals.authContext as AuthContext;
+  await createComment(parseTodoId(req.params.id), parsed.data, user);
+  res.status(204).end();
+});
+
+// コメントを編集する。投稿者以外の家族も操作できる。
+todoRouter.patch("/comments/:id", async (req, res) => {
+  const parsed = commentSchema.safeParse(req.body);
+  if (!parsed.success)
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  const { user } = res.locals.authContext as AuthContext;
+  await updateComment(parseTodoId(req.params.id), parsed.data, user);
+  res.status(204).end();
+});
+
+// コメントを削除する。投稿者以外の家族も操作できる。
+todoRouter.delete("/comments/:id", async (req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  await deleteComment(parseTodoId(req.params.id), user);
   res.status(204).end();
 });

@@ -32,10 +32,18 @@ export interface TodoSummary {
 }
 
 // GET /todos/:id の応答。編集画面の初期値に使う。
-export interface TodoDetail extends Omit<
-  TodoSummary,
-  "commentCount" | "completedByDisplayName" | "completedAt" | "createdAt"
-> {
+export interface TodoDetail extends TodoSummary {
   recurrenceConfig: { weekdays: number[] } | { day: number } | null;
   assignees: (TodoAssigneeSummary & { isFollower: boolean })[];
+  createdByDisplayName: string;
+  comments: TodoComment[];
+}
+
+// ToDo詳細画面に表示するコメント1件分。
+export interface TodoComment {
+  id: number;
+  body: string;
+  userDisplayName: string;
+  createdAt: string;
+  updatedAt: string;
 }

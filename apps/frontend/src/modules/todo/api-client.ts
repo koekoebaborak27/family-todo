@@ -98,6 +98,26 @@ export function incompleteTodo(todoId: number): Promise<void> {
   return postComplete(todoId, "incomplete");
 }
 
+// ToDoを削除する。
+export async function deleteTodo(todoId: number): Promise<void> {
+  await sendTodo(`/api/v1/todos/${todoId}`, "DELETE");
+}
+
+// ToDoへコメントを追加する。
+export async function createComment(todoId: number, body: string): Promise<void> {
+  await sendTodo(`/api/v1/todos/${todoId}/comments`, "POST", { body });
+}
+
+// コメント本文を更新する。
+export async function updateComment(commentId: number, body: string): Promise<void> {
+  await sendTodo(`/api/v1/comments/${commentId}`, "PATCH", { body });
+}
+
+// コメントを削除する。
+export async function deleteComment(commentId: number): Promise<void> {
+  await sendTodo(`/api/v1/comments/${commentId}`, "DELETE");
+}
+
 // ToDo追加・編集画面の担当者選択肢を取得する。
 export async function fetchFamilyMembers(): Promise<FamilyMember[]> {
   const response = await getJson("/api/v1/families/me/members");
@@ -132,14 +152,14 @@ export async function fetchTodo(todoId: number): Promise<TodoDetail> {
 // JSONを送る更新APIの共通処理。通信・認証・入力エラーを画面用例外へ変換する。
 async function sendTodo(
   path: string,
-  method: "POST" | "PATCH" | "PUT",
-  body: unknown,
+  method: "POST" | "PATCH" | "PUT" | "DELETE",
+  body?: unknown,
 ): Promise<Response> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
   }).catch((): never => {
     throw new TodoError(TODO_ERROR_MESSAGES.network, "network");
   });
