@@ -5,6 +5,7 @@
 | ファイル | 内容 |
 | --- | --- |
 | [`cloudflare-workers-検証.md`](cloudflare-workers-検証.md) | Cloudflare Workers 上での Express / Web Push（VAPID）/ Cron Triggers の技術検証で使ったコマンドと落とし穴 |
+| [`wrangler-dev-ローカル起動.md`](wrangler-dev-ローカル起動.md) | `wrangler dev` のローカル起動で詰まった点（ポート衝突・残留プロセスの見分け方と終了手順など） |
 
 ## 書き方
 
