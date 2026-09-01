@@ -23,7 +23,7 @@
 | 区分 | 進捗 |
 | --- | --- |
 | 要件定義（未決事項の確定） | 8 / 8（完了） |
-| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築 完了。実装は8画面中2画面（ログイン・家族グループ作成/参加）完了、残り6画面・単体テスト全体・結合テスト・CI/CD・デプロイは未着手 |
+| 基本設計〜デプロイ | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築 完了。実装は8画面中3画面（ログイン・家族グループ作成/参加・ToDo一覧）完了、残り5画面・単体テスト全体・結合テスト・CI/CD・デプロイは未着手 |
 
 ## 次にやること
 
@@ -48,7 +48,8 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 - [x] 9. 開発環境を構築する（Next.js / Express / Cloudflare D1 / Google OAuth / Web Push の初期セットアップ）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-開発環境を構築nextjs--express--cloudflare-d1--google-oauth--web-push-の初期セットアップ)
 - [x] 10. 実装する（最初の機能としてログイン画面を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装)
 - [x] 11. 実装を続ける（2機能目として家族グループ作成・参加画面を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装)
-- [ ] 12. 実装を続ける（次の画面から着手する。着手時にユーザーと対象機能を確認する。候補: ToDo一覧・ToDo追加/編集・ToDo詳細・家族グループ設定・個人設定・iOSインストール案内の残り6画面。ToDo一覧は家族グループ作成・参加/ログイン成功後の遷移先が404になっている状態を解消するため優先度が高い）
+- [x] 12. 実装を続ける（3機能目としてToDo一覧画面を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装)
+- [ ] 13. 実装を続ける（次の画面から着手する。着手時にユーザーと対象機能を確認する。候補: ToDo追加/編集・ToDo詳細・家族グループ設定・個人設定・iOSインストール案内の残り5画面。ToDo追加/編集はToDo一覧の追加ボタン・カードタップの遷移先が404になっている状態を解消するため優先度が高い）
 
 ## 残っているタスク
 
@@ -76,9 +77,9 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `feature/family-group-setup`（`main` から作成。`main` にはPR #2＝ログイン機能がマージ済み。コミット・PR作成はユーザー承認待ち） |
-| ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション2件（`users`・`sessions`・`notification_settings`、`families`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
-| 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎは実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) |
+| 作業ブランチ | `feature/todo-list`（`main` から作成。`main` にはPR #3＝家族グループ作成・参加機能がマージ済み。コミット・PR作成はユーザー承認待ち） |
+| ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
+| 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) |
 | 本番 | 未構築 |
 | 要件定義書 | 未決事項8件を含めて確定済み → [`docs/specs/01_requirements/family-todo/`](../specs/01_requirements/family-todo/README.md) |
 | 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み）。インフラ関連の技術検証3件も完了（Express・Web Push とも動作確認済み、通知の定期実行は15分おきに確定） → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |

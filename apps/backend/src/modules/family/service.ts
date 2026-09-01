@@ -1,7 +1,13 @@
 import type { AuthenticatedUser } from "../auth";
+import { ensureFamilyMembership } from "../../shared/auth/ensure-family-membership";
 import { Errors } from "../../shared/errors/app-error";
-import { createFamilyRow, findFamilyByInviteCode, setUserFamilyId } from "./repository";
-import type { FamilySummary } from "./types";
+import {
+  createFamilyRow,
+  findFamilyByInviteCode,
+  findFamilyById,
+  setUserFamilyId,
+} from "./repository";
+import type { FamilyDetail, FamilySummary } from "./types";
 import type { CreateFamilyInput, JoinFamilyInput } from "./validation";
 
 const INVITE_CODE_LENGTH = 8;
@@ -80,4 +86,23 @@ export async function joinFamily(
 
   await setUserFamilyId(user.id, family.id);
   return { id: family.id, name: family.name };
+}
+
+// 自分の所属グループの情報を取得する。docs/specs/02_basic-design/family-todo/14_ToDo一覧.md「9. 使用API」。
+export async function getMyFamily(user: AuthenticatedUser): Promise<FamilyDetail> {
+  const familyId = ensureFamilyMembership(user);
+
+  const family = await findFamilyById(familyId);
+  if (!family) {
+    throw Errors.NOT_FOUND("所属している家族グループが見つかりません。");
+  }
+
+  return {
+    id: family.id,
+    name: family.name,
+    inviteCode: family.invite_code,
+    inviteCodeExpiresAt: family.invite_code_expires_at,
+    createdByUserId: family.created_by_user_id,
+    createdAt: family.created_at,
+  };
 }

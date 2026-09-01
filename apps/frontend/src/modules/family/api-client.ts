@@ -22,6 +22,14 @@ export interface FamilySummary {
   name: string;
 }
 
+async function getJson(path: string): Promise<Response> {
+  return fetch(`${API_BASE_URL}${path}`, {
+    credentials: "include",
+  }).catch((): never => {
+    throw new FamilyError(FAMILY_ERROR_MESSAGES.network, "top");
+  });
+}
+
 async function postJson(path: string, body: unknown): Promise<Response> {
   return fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
@@ -51,6 +59,23 @@ export async function createFamily(name: string): Promise<FamilySummary> {
     throw new FamilyError(await readErrorMessage(response), "field");
   }
   if (response.status === 409) {
+    throw new FamilyError(await readErrorMessage(response), "top");
+  }
+  if (!response.ok) {
+    throw new FamilyError(FAMILY_ERROR_MESSAGES.serverError, "top");
+  }
+
+  return (await response.json()) as FamilySummary;
+}
+
+// 自分の所属グループの情報を取得する（ToDo一覧のヘッダーでグループ名を表示するために使う）。
+export async function fetchMyFamily(): Promise<FamilySummary> {
+  const response = await getJson("/api/v1/families/me");
+
+  if (response.status === 401) {
+    throw new FamilyError(FAMILY_ERROR_MESSAGES.unauthorized, "top");
+  }
+  if (response.status === 403) {
     throw new FamilyError(await readErrorMessage(response), "top");
   }
   if (!response.ok) {

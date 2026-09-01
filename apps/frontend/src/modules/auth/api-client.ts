@@ -31,6 +31,16 @@ export async function fetchMe(): Promise<MeResult> {
   return { authenticated: true, hasFamily: body.hasFamily };
 }
 
+// ログアウトする。呼び出し側でCookie失効後の画面遷移（ログイン画面へ）を行う。
+export async function logout(): Promise<void> {
+  await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  }).catch((): never => {
+    throw new LoginError(LOGIN_ERROR_MESSAGES.network);
+  });
+}
+
 // Googleから戻ってきた認可コードでログインする。
 export async function exchangeGoogleCode(code: string): Promise<{ hasFamily: boolean }> {
   const response = await fetch(`${API_BASE_URL}/api/v1/auth/google/callback`, {

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import type { AuthContext } from "../auth";
 import { Errors } from "../../shared/errors/app-error";
-import { createFamily, joinFamily } from "./service";
+import { createFamily, getMyFamily, joinFamily } from "./service";
 import { createFamilySchema, joinFamilySchema } from "./validation";
 
 export const familyRouter = Router();
@@ -32,5 +32,13 @@ familyRouter.post("/families/join", async (req, res) => {
 
   const { user } = res.locals.authContext as AuthContext;
   const family = await joinFamily(parsed.data, user);
+  res.status(200).json(family);
+});
+
+// 自分の所属グループの情報を取得する。requireAuth（src/index.ts）を通過済み。
+// 未所属なら403（service側でensureFamilyMembershipにより判定）。
+familyRouter.get("/families/me", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  const family = await getMyFamily(user);
   res.status(200).json(family);
 });
