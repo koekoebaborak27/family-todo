@@ -18,7 +18,11 @@ export function cardTitles(page: Page, prefix: string) {
 }
 
 // 並び替えプルダウン（1つ目=項目、2つ目=順序）を選択する。
-export async function selectSortOption(page: Page, index: 0 | 1, optionLabel: string): Promise<void> {
+export async function selectSortOption(
+  page: Page,
+  index: 0 | 1,
+  optionLabel: string,
+): Promise<void> {
   await page.locator('[data-slot="select-trigger"]').nth(index).click();
   await page.getByRole("option", { name: optionLabel }).click();
 }

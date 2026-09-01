@@ -20,7 +20,13 @@ import {
   expireSession,
   sessionCookie,
 } from "../support/seed";
-import { cardByTitle, cardTitles, isoDaysFromNow, openTodosAs, selectSortOption } from "../support/scenario";
+import {
+  cardByTitle,
+  cardTitles,
+  isoDaysFromNow,
+  openTodosAs,
+  selectSortOption,
+} from "../support/scenario";
 
 // 仕様書: docs/test/unit/spec/todo/UT_14_ToDo一覧.md
 // 対象: ToDo一覧画面（/todos）。ログイン済み状態はローカルD1へのセッション直接投入で代替する。
@@ -77,7 +83,11 @@ test("TC-001: 初期表示", async ({ page, context }) => {
     priority: "medium",
     dueAt: isoDaysFromNow(5),
   });
-  await createTodo(api1, { title: "TC001-期限なし", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC001-期限なし",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await expect(page.getByRole("heading", { name: "ToDo一覧テスト家族" })).toBeVisible();
@@ -87,7 +97,11 @@ test("TC-001: 初期表示", async ({ page, context }) => {
 });
 
 test("TC-002: 完了状態タブの切り替え", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC002-完了", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC002-完了",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
   await completeTodo(api1, todo.id);
 
   await openTodosAs(page, context, u1.sessionId);
@@ -113,7 +127,11 @@ test("TC-003: 完了状態タブを未完了へ戻す", async ({ page, context }
 
 test("TC-004: 並び順タブ「優先度順」への切り替え", async ({ page, context }) => {
   await createTodo(api1, { title: "TC004-高", categoryId: CATEGORY_IDS.その他, priority: "high" });
-  await createTodo(api1, { title: "TC004-中", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC004-中",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
   await createTodo(api1, { title: "TC004-低", categoryId: CATEGORY_IDS.その他, priority: "low" });
 
   await openTodosAs(page, context, u1.sessionId);
@@ -179,8 +197,16 @@ test("TC-007: 並び替えプルダウンの並び順反転", async ({ page, con
 });
 
 test("TC-008: カテゴリ絞り込み", async ({ page, context }) => {
-  await createTodo(api1, { title: "TC008-学校", categoryId: CATEGORY_IDS.学校, priority: "medium" });
-  await createTodo(api1, { title: "TC008-仕事", categoryId: CATEGORY_IDS.仕事, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC008-学校",
+    categoryId: CATEGORY_IDS.学校,
+    priority: "medium",
+  });
+  await createTodo(api1, {
+    title: "TC008-仕事",
+    categoryId: CATEGORY_IDS.仕事,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await page.getByRole("button", { name: "学校", exact: true }).click();
@@ -190,8 +216,16 @@ test("TC-008: カテゴリ絞り込み", async ({ page, context }) => {
 });
 
 test("TC-009: カテゴリ絞り込みの解除", async ({ page, context }) => {
-  await createTodo(api1, { title: "TC009-学校", categoryId: CATEGORY_IDS.学校, priority: "medium" });
-  await createTodo(api1, { title: "TC009-仕事", categoryId: CATEGORY_IDS.仕事, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC009-学校",
+    categoryId: CATEGORY_IDS.学校,
+    priority: "medium",
+  });
+  await createTodo(api1, {
+    title: "TC009-仕事",
+    categoryId: CATEGORY_IDS.仕事,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await page.getByRole("button", { name: "学校", exact: true }).click();
@@ -202,7 +236,11 @@ test("TC-009: カテゴリ絞り込みの解除", async ({ page, context }) => {
 });
 
 test("TC-010: 完了チェックボックス（未完了→完了）", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC010-完了操作", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC010-完了操作",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await cardByTitle(page, "TC010-完了操作").getByRole("checkbox").click();
@@ -218,7 +256,11 @@ test("TC-010: 完了チェックボックス（未完了→完了）", async ({ 
 });
 
 test("TC-011: トースト「元に戻す」", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC011-元に戻す", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC011-元に戻す",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await cardByTitle(page, "TC011-元に戻す").getByRole("checkbox").click();
@@ -233,7 +275,11 @@ test("TC-011: トースト「元に戻す」", async ({ page, context }) => {
 });
 
 test("TC-012: 完了チェックボックス（完了→未完了）", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC012-未完了操作", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC012-未完了操作",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
   await completeTodo(api1, todo.id);
 
   await openTodosAs(page, context, u1.sessionId);
@@ -252,7 +298,11 @@ test("TC-013: 追加ボタン", async ({ page, context }) => {
 });
 
 test("TC-014: ToDoカードのタップ", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC014-詳細遷移", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC014-詳細遷移",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await page.getByText("TC014-詳細遷移", { exact: true }).click();
@@ -359,7 +409,11 @@ test("TC-022: 非登録メンバーを含む担当者の表示", async ({ page, 
 });
 
 test("TC-023: 担当者なしの表示", async ({ page, context }) => {
-  await createTodo(api1, { title: "TC023-担当者なし", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC023-担当者なし",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await expect(cardByTitle(page, "TC023-担当者なし")).toContainText("担当者なし");
@@ -367,7 +421,11 @@ test("TC-023: 担当者なしの表示", async ({ page, context }) => {
 });
 
 test("TC-024: コメント件数の表示", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC024-コメント", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC024-コメント",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
   await addComment(api1, todo.id, "テストコメント1");
   await addComment(api1, todo.id, "テストコメント2");
 
@@ -388,7 +446,9 @@ test.describe("0件確認（専用の家族グループを使う）", () => {
     await createFamily(api, "0件確認家族A");
 
     await openTodosAs(page, context, uEmpty.sessionId);
-    await expect(page.getByText("未完了のToDoはありません。右下のボタンから追加できます。")).toBeVisible();
+    await expect(
+      page.getByText("未完了のToDoはありません。右下のボタンから追加できます。"),
+    ).toBeVisible();
     await page.screenshot({ path: screenshotPath(DIR, 26, "未完了0件") });
     await api.dispose();
   });
@@ -410,7 +470,11 @@ test.describe("カテゴリ絞り込み0件（専用の家族グループを使�
     uEmptyCat = createSeedUser({ slug: "todo-empty-cat", displayName: "絞込太郎" });
     const api = await apiFor(uEmptyCat.sessionId);
     await createFamily(api, "0件確認家族B");
-    await createTodo(api, { title: "学校のToDo", categoryId: CATEGORY_IDS.学校, priority: "medium" });
+    await createTodo(api, {
+      title: "学校のToDo",
+      categoryId: CATEGORY_IDS.学校,
+      priority: "medium",
+    });
     await api.dispose();
   });
 
@@ -432,10 +496,20 @@ test.describe("カテゴリ絞り込み0件（専用の家族グループを使�
 
 test("TC-029: 期限が同一のタイブレーク", async ({ page, context }) => {
   const dueAt = isoDaysFromNow(10);
-  await createTodo(api1, { title: "TC029-先に作成", categoryId: CATEGORY_IDS.その他, priority: "medium", dueAt });
+  await createTodo(api1, {
+    title: "TC029-先に作成",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+    dueAt,
+  });
   // created_at はSQLiteのCURRENT_TIMESTAMPで秒単位のため、作成日時に差を付ける。
   await new Promise((resolve) => setTimeout(resolve, 1100));
-  await createTodo(api1, { title: "TC029-後で作成", categoryId: CATEGORY_IDS.その他, priority: "medium", dueAt });
+  await createTodo(api1, {
+    title: "TC029-後で作成",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+    dueAt,
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await expect(cardTitles(page, "TC029-")).toHaveText(["TC029-後で作成", "TC029-先に作成"]);
@@ -449,7 +523,11 @@ test("TC-030: 期限なしの末尾集約", async ({ page, context }) => {
     priority: "medium",
     dueAt: isoDaysFromNow(3),
   });
-  await createTodo(api1, { title: "TC030-期限なし", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  await createTodo(api1, {
+    title: "TC030-期限なし",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await expect(cardTitles(page, "TC030-")).toHaveText(["TC030-期限あり", "TC030-期限なし"]);
@@ -512,7 +590,8 @@ test("TC-034: 一覧取得のサーバーエラー", async ({ page, context }) =
 test("TC-035: 一覧取得の通信エラー", async ({ page, context }) => {
   await context.route(
     (url) => url.pathname === "/api/v1/todos",
-    (route) => (route.request().method() !== "GET" ? route.continue() : route.abort("connectionfailed")),
+    (route) =>
+      route.request().method() !== "GET" ? route.continue() : route.abort("connectionfailed"),
   );
 
   await openTodosAs(page, context, u1.sessionId);
@@ -521,7 +600,11 @@ test("TC-035: 一覧取得の通信エラー", async ({ page, context }) => {
 });
 
 test("TC-036: 完了操作時に対象ToDoが削除済み（404）", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC036-削除済み", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC036-削除済み",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await openTodosAs(page, context, u1.sessionId);
   await expect(cardByTitle(page, "TC036-削除済み")).toBeVisible();
@@ -535,7 +618,11 @@ test("TC-036: 完了操作時に対象ToDoが削除済み（404）", async ({ pa
 });
 
 test("TC-037: 完了操作時のサーバーエラー", async ({ page, context }) => {
-  const todo = await createTodo(api1, { title: "TC037-操作失敗", categoryId: CATEGORY_IDS.その他, priority: "medium" });
+  const todo = await createTodo(api1, {
+    title: "TC037-操作失敗",
+    categoryId: CATEGORY_IDS.その他,
+    priority: "medium",
+  });
 
   await context.route(
     (url) => url.pathname === `/api/v1/todos/${todo.id}/complete`,
@@ -574,9 +661,7 @@ test("TC-038/039: Push通知許可→購読登録・重複登録防止", async (
   }
 
   if (subscribed) {
-    const before = await (
-      await api8.get(`${API_BASE_URL}/api/v1/families/me`)
-    ).json();
+    const before = await (await api8.get(`${API_BASE_URL}/api/v1/families/me`)).json();
     expect(before).toBeTruthy();
 
     // 重複登録防止（TC-039）: 同じ購読状態のまま再度開いても増えないことを、

@@ -19,10 +19,11 @@ function pastIso(): string {
 
 // ログインを経由せず、テスト用ユーザーとログイン済みセッションを直接D1へ投入する。
 // docs/todo/notes/ローカルD1へのセッション投入によるUI確認.md と同じ割り切り。
-export function createSeedUser(options: {
-  slug: string;
-  displayName: string;
-}): { userId: number; sessionId: string; googleSub: string } {
+export function createSeedUser(options: { slug: string; displayName: string }): {
+  userId: number;
+  sessionId: string;
+  googleSub: string;
+} {
   const googleSub = `${E2E_GOOGLE_SUB_PREFIX}${options.slug}-${randomUUID().slice(0, 8)}`;
   const email = `${googleSub}@example.com`;
 
@@ -41,7 +42,9 @@ export function createSeedUser(options: {
 
 // セッションを期限切れにする（401を再現する）。
 export function expireSession(sessionId: string): void {
-  execSql(`UPDATE sessions SET expires_at = ${sqlString(pastIso())} WHERE id = ${sqlString(sessionId)};`);
+  execSql(
+    `UPDATE sessions SET expires_at = ${sqlString(pastIso())} WHERE id = ${sqlString(sessionId)};`,
+  );
 }
 
 // セッションを削除する（Cookieは残っているがセッション自体が無い状態を再現する）。

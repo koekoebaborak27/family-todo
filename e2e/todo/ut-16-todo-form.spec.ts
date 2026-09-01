@@ -8,7 +8,13 @@ import {
   deleteTodo,
 } from "../support/api";
 import { evidenceDir, screenshotPath } from "../support/evidence";
-import { cleanupE2eData, clearFamily, createSeedUser, expireSession, sessionCookie } from "../support/seed";
+import {
+  cleanupE2eData,
+  clearFamily,
+  createSeedUser,
+  expireSession,
+  sessionCookie,
+} from "../support/seed";
 import { isoDaysFromNow } from "../support/scenario";
 
 // 仕様書: docs/test/unit/spec/todo/UT_16_ToDo追加・編集.md
@@ -34,7 +40,8 @@ test.beforeAll(async () => {
 
   u2 = createSeedUser({ slug: "todoform-second", displayName: "花子" });
   const api2 = await apiFor(u2.sessionId);
-  const inviteCode = (await (await api1.get(`${API_BASE_URL}/api/v1/families/me`)).json()).inviteCode;
+  const inviteCode = (await (await api1.get(`${API_BASE_URL}/api/v1/families/me`)).json())
+    .inviteCode;
   await api2.post(`${API_BASE_URL}/api/v1/families/join`, { data: { inviteCode } });
   await api2.dispose();
 });
@@ -44,7 +51,11 @@ test.afterAll(async () => {
   cleanupE2eData();
 });
 
-async function openNewTodoAs(page: import("@playwright/test").Page, context: import("@playwright/test").BrowserContext, sessionId: string) {
+async function openNewTodoAs(
+  page: import("@playwright/test").Page,
+  context: import("@playwright/test").BrowserContext,
+  sessionId: string,
+) {
   await context.addCookies(sessionCookie(sessionId));
   await page.goto("/todos/new");
 }
@@ -398,7 +409,9 @@ test("TC-029: 非登録メンバー選択・フォロー役未選択", async ({ 
   await page.getByRole("button", { name: "追加する" }).click();
 
   await expect(
-    page.getByText("ログインしないメンバーを担当者にする場合は、通知を受け取る家族を1人以上選んでください。"),
+    page.getByText(
+      "ログインしないメンバーを担当者にする場合は、通知を受け取る家族を1人以上選んでください。",
+    ),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/todos\/new$/);
   await page.screenshot({ path: screenshotPath(DIR, 29, "フォロー役未選択") });

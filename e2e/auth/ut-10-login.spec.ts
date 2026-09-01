@@ -60,8 +60,8 @@ test("TC-003: 招待コード付きURLで未ログインのまま開く", async 
   await page.goto("/?inviteCode=TESTCODE1");
   await expect(page.getByRole("button", { name: "Googleでログイン" })).toBeVisible();
 
-  const storedInviteCode = await page.evaluate(
-    () => window.sessionStorage.getItem("family-todo:pending-invite-code"),
+  const storedInviteCode = await page.evaluate(() =>
+    window.sessionStorage.getItem("family-todo:pending-invite-code"),
   );
   expect(storedInviteCode).toBe("TESTCODE1");
 

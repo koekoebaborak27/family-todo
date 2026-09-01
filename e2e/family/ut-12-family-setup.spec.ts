@@ -28,7 +28,9 @@ test("TC-001: 初期表示（通常アクセス）", async ({ page, context }) =
   await page.goto("/family/setup");
   await expect(page.getByRole("heading", { name: "家族グループ" })).toBeVisible();
   await expect(
-    page.getByText("ToDoを共有する家族グループを作るか、家族から届いた招待コードで参加してください。"),
+    page.getByText(
+      "ToDoを共有する家族グループを作るか、家族から届いた招待コードで参加してください。",
+    ),
   ).toBeVisible();
   await expect(page.getByRole("tab", { name: "家族グループを作る" })).toHaveAttribute(
     "aria-selected",
@@ -89,7 +91,9 @@ test("TC-005: 招待コードでの参加", async ({ page, context }) => {
 
   await page.goto("/family/setup");
   await page.getByRole("tab", { name: "招待コードで参加する" }).click();
-  await page.getByRole("textbox", { name: "招待コード" }).fill(family.inviteCode ?? (await fetchInviteCode(ownerApi)));
+  await page
+    .getByRole("textbox", { name: "招待コード" })
+    .fill(family.inviteCode ?? (await fetchInviteCode(ownerApi)));
   await page.getByRole("button", { name: "参加する" }).click();
 
   await expect(page).toHaveURL(/\/todos$/);
@@ -100,7 +104,9 @@ test("TC-005: 招待コードでの参加", async ({ page, context }) => {
 
 // createFamilyのレスポンスにinviteCodeが無い場合の保険（型定義上は無いためGET /families/meで取得する）。
 async function fetchInviteCode(api: APIRequestContext): Promise<string> {
-  const response = await api.get(`${process.env.E2E_API_BASE_URL ?? "http://localhost:8787"}/api/v1/families/me`);
+  const response = await api.get(
+    `${process.env.E2E_API_BASE_URL ?? "http://localhost:8787"}/api/v1/families/me`,
+  );
   const body = (await response.json()) as { inviteCode: string };
   return body.inviteCode;
 }
@@ -240,7 +246,9 @@ test("TC-016: 招待コードが正しくない", async ({ page, context }) => {
   await page.getByRole("textbox", { name: "招待コード" }).fill("ZZZZZZZZ");
   await page.getByRole("button", { name: "参加する" }).click();
 
-  await expect(page.getByText("招待コードが正しくありません。家族に確認してください。")).toBeVisible();
+  await expect(
+    page.getByText("招待コードが正しくありません。家族に確認してください。"),
+  ).toBeVisible();
   await expect(page).toHaveURL(/\/family\/setup$/);
   await page.screenshot({ path: screenshotPath(DIR, 16, "招待コード不一致") });
 });
@@ -260,7 +268,8 @@ test("TC-017: 招待コードの有効期限切れ", async ({ page, context }) =
         body: JSON.stringify({
           error: {
             code: "VALIDATION_ERROR",
-            message: "この招待コードは有効期限が切れています。家族に招待リンクを再発行してもらってください。",
+            message:
+              "この招待コードは有効期限が切れています。家族に招待リンクを再発行してもらってください。",
           },
         }),
       }),
@@ -272,7 +281,9 @@ test("TC-017: 招待コードの有効期限切れ", async ({ page, context }) =
   await page.getByRole("button", { name: "参加する" }).click();
 
   await expect(
-    page.getByText("この招待コードは有効期限が切れています。家族に招待リンクを再発行してもらってください。"),
+    page.getByText(
+      "この招待コードは有効期限が切れています。家族に招待リンクを再発行してもらってください。",
+    ),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/family\/setup$/);
   await page.screenshot({ path: screenshotPath(DIR, 17, "招待コード期限切れ") });

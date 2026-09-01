@@ -109,7 +109,9 @@ export async function addComment(
     data: { body },
   });
   if (!response.ok()) {
-    throw new Error(`POST /todos/${todoId}/comments failed: ${response.status()} ${await response.text()}`);
+    throw new Error(
+      `POST /todos/${todoId}/comments failed: ${response.status()} ${await response.text()}`,
+    );
   }
 }
 
