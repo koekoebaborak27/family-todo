@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { fetchMe } from "@/modules/auth";
+import { IosInstallBanner } from "@/modules/ios-install-guide";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -147,78 +148,81 @@ export function FamilySetupScreen() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <div className="flex w-full max-w-sm flex-col gap-2 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">家族グループ</h1>
-        <p className="text-sm text-muted-foreground">
-          ToDoを共有する家族グループを作るか、家族から届いた招待コードで参加してください。
-        </p>
-      </div>
+    <>
+      <IosInstallBanner />
+      <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
+        <div className="flex w-full max-w-sm flex-col gap-2 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight">家族グループ</h1>
+          <p className="text-sm text-muted-foreground">
+            ToDoを共有する家族グループを作るか、家族から届いた招待コードで参加してください。
+          </p>
+        </div>
 
-      {topError && (
-        <p className="w-full max-w-sm text-sm text-destructive" role="alert">
-          {topError}
-        </p>
-      )}
+        {topError && (
+          <p className="w-full max-w-sm text-sm text-destructive" role="alert">
+            {topError}
+          </p>
+        )}
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-sm">
-        <TabsList className="w-full">
-          <TabsTrigger value="create" className="flex-1">
-            家族グループを作る
-          </TabsTrigger>
-          <TabsTrigger value="join" className="flex-1">
-            招待コードで参加する
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full max-w-sm">
+          <TabsList className="w-full">
+            <TabsTrigger value="create" className="flex-1">
+              家族グループを作る
+            </TabsTrigger>
+            <TabsTrigger value="join" className="flex-1">
+              招待コードで参加する
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="create">
-          <form onSubmit={handleCreateSubmit} className="flex flex-col gap-3 pt-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="family-name">グループ名</Label>
-              <Input
-                id="family-name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="例: 山田家"
-                aria-invalid={nameError !== null}
-                disabled={creating}
-              />
-              {nameError && (
-                <p className="text-sm text-destructive" role="alert">
-                  {nameError}
-                </p>
-              )}
-            </div>
-            <Button type="submit" disabled={creating}>
-              この名前で作成する
-            </Button>
-          </form>
-        </TabsContent>
+          <TabsContent value="create">
+            <form onSubmit={handleCreateSubmit} className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="family-name">グループ名</Label>
+                <Input
+                  id="family-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="例: 山田家"
+                  aria-invalid={nameError !== null}
+                  disabled={creating}
+                />
+                {nameError && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {nameError}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" disabled={creating}>
+                この名前で作成する
+              </Button>
+            </form>
+          </TabsContent>
 
-        <TabsContent value="join">
-          <form onSubmit={handleJoinSubmit} className="flex flex-col gap-3 pt-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="invite-code">招待コード</Label>
-              <Input
-                id="invite-code"
-                value={inviteCode}
-                onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
-                placeholder="例: A3F9K2QP"
-                aria-invalid={inviteCodeError !== null}
-                disabled={joining}
-              />
-              {inviteCodeError && (
-                <p className="text-sm text-destructive" role="alert">
-                  {inviteCodeError}
-                </p>
-              )}
-            </div>
-            <Button type="submit" disabled={joining}>
-              参加する
-            </Button>
-          </form>
-        </TabsContent>
-      </Tabs>
-    </main>
+          <TabsContent value="join">
+            <form onSubmit={handleJoinSubmit} className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="invite-code">招待コード</Label>
+                <Input
+                  id="invite-code"
+                  value={inviteCode}
+                  onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
+                  placeholder="例: A3F9K2QP"
+                  aria-invalid={inviteCodeError !== null}
+                  disabled={joining}
+                />
+                {inviteCodeError && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {inviteCodeError}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" disabled={joining}>
+                参加する
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </>
   );
 }

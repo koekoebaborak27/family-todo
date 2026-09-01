@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { fetchMe, logout } from "@/modules/auth";
+import { IosInstallDrawer } from "@/modules/ios-install-guide";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,6 +77,7 @@ export function SettingsScreen() {
   const [savingDueTime, setSavingDueTime] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [pushStatusMessage, setPushStatusMessage] = useState("");
+  const [installDrawerOpen, setInstallDrawerOpen] = useState(false);
 
   // プロフィールと通知設定をまとめて読み込む。
   const loadSettings = useCallback(() => {
@@ -382,7 +384,13 @@ export function SettingsScreen() {
               通知を許可する
             </Button>
           )}
+        {isIosNotInstalled() && (
+          <Button variant="outline" onClick={() => setInstallDrawerOpen(true)}>
+            追加のしかたを見る
+          </Button>
+        )}
       </section>
+      <IosInstallDrawer open={installDrawerOpen} onOpenChange={setInstallDrawerOpen} />
 
       <Button variant="destructive" onClick={() => setLogoutDialogOpen(true)}>
         ログアウト
