@@ -10,6 +10,11 @@ GOOGLE_CLIENT_SECRET=
 # Frontendの「Googleでログイン」ボタンから戻ってくる先。ローカルはFrontendの起動先を指す。
 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
 
+#「このAPIを呼んでよいWebサイト（フロントエンド）はどこか」を指定する設定
+# CORSで許可するFrontendのオリジン（末尾スラッシュなし）。このオリジン以外からのAPI呼び出しは
+# ブラウザ側でブロックされる（CSRF対策。docs/specs/03_detail-design/family-todo/30_ログインセッション管理.md）。
+FRONTEND_ORIGIN=http://localhost:3000
+
 # Web Push（VAPID）。使い捨てではない鍵ペアを1組作り、公開鍵はFrontend側の
 # NEXT_PUBLIC_VAPID_PUBLIC_KEY と同じ値を設定する。生成方法は
 # docs/todo/notes/cloudflare-workers-検証.md の「検証2」を参照。

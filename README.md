@@ -8,9 +8,17 @@
 - **認証**: Googleログイン（OAuth）
 - **通知**: Web Push（VAPID）
 
-pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。まだ機能の実装は始まっておらず、現時点では開発環境のひな形のみが入っている。
+pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は1画面（ログイン）から実装を始めた段階で、残りの画面は順次実装していく。
 
 このリポジトリは **Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ように作られています。詳しくは「AIエージェントによる開発」を参照。
+
+## 主な機能
+
+要件定義の8画面のうち、実装済みのものだけを載せる。残りは [`docs/todo/TODO.md`](docs/todo/TODO.md)「次にやること」を参照。
+
+| 画面 | ルート | 内容 |
+|---|---|---|
+| ログイン | `/`（ログイン後の戻り先: `/auth/callback`） | Googleログイン。所属グループの有無で遷移先を振り分ける → [`docs/specs/02_basic-design/family-todo/10_ログイン.md`](docs/specs/02_basic-design/family-todo/10_ログイン.md) |
 
 ## セットアップ
 
@@ -24,10 +32,10 @@ pnpm install
 
 | コピー元 | コピー先 | 内容 |
 |---|---|---|
-| [`apps/backend/.dev.vars.example`](apps/backend/.dev.vars.example) | `apps/backend/.dev.vars` | Google OAuthクライアントシークレット・VAPID鍵（Backend用） |
+| [`apps/backend/.dev.vars.example`](apps/backend/.dev.vars.example) | `apps/backend/.dev.vars` | Google OAuthクライアントシークレット・CORSの許可オリジン・VAPID鍵（Backend用） |
 | [`apps/frontend/.env.local.example`](apps/frontend/.env.local.example) | `apps/frontend/.env.local` | Google OAuthクライアントID・VAPID公開鍵（Frontend用） |
 
-Google OAuthクライアントの作り方、VAPID鍵の生成コマンドは [`docs/todo/notes/cloudflare-workers-検証.md`](docs/todo/notes/cloudflare-workers-検証.md) を参照。値を埋めなくても次の「起動する」は動く（ログイン・通知機能を使う画面を実装する段階で必要になる）。
+Google OAuthクライアントの作り方、VAPID鍵の生成コマンドは [`docs/todo/notes/cloudflare-workers-検証.md`](docs/todo/notes/cloudflare-workers-検証.md) を参照。次の「起動する」自体は値が空でも動くが、ログイン画面を実際に使う（Googleの認可画面まで進む）にはGoogleのクライアントID・シークレットの設定が必要。
 
 ### 3. 起動する
 
