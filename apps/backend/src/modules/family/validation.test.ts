@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFamilySchema, joinFamilySchema } from "./validation";
+import { createFamilySchema, createUnregisteredMemberSchema, joinFamilySchema } from "./validation";
 
 /**
  * 対象: family/validation createFamilySchema・joinFamilySchema
@@ -69,6 +69,24 @@ describe("family/validation joinFamilySchema", () => {
     it("記号を含む場合は弾く", () => {
       const result = joinFamilySchema.safeParse({ inviteCode: "A3F9-2QP" });
       expect(result.success).toBe(false);
+    });
+  });
+});
+
+describe("family/validation createUnregisteredMemberSchema", () => {
+  describe("名前が空白のみのとき", () => {
+    it("「名前を入力してください。」で検証を弾く", () => {
+      const result = createUnregisteredMemberSchema.safeParse({ name: "  " });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe("名前を入力してください。");
+    });
+  });
+
+  describe("名前が20文字を超えるとき", () => {
+    it("「名前は20文字以内で入力してください。」で検証を弾く", () => {
+      const result = createUnregisteredMemberSchema.safeParse({ name: "あ".repeat(21) });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe("名前は20文字以内で入力してください。");
     });
   });
 });

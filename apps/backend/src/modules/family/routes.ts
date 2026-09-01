@@ -3,12 +3,17 @@ import type { AuthContext } from "../auth";
 import { Errors } from "../../shared/errors/app-error";
 import {
   createFamily,
+  addMyUnregisteredFamilyMember,
+  deleteMyFamily,
   getMyFamily,
   getMyFamilyMembers,
   getMyUnregisteredFamilyMembers,
   joinFamily,
+  leaveMyFamily,
+  removeMyUnregisteredFamilyMember,
+  renewMyFamilyInviteCode,
 } from "./service";
-import { createFamilySchema, joinFamilySchema } from "./validation";
+import { createFamilySchema, createUnregisteredMemberSchema, joinFamilySchema } from "./validation";
 
 export const familyRouter = Router();
 
@@ -61,4 +66,49 @@ familyRouter.get("/families/me/unregistered-members", async (_req, res) => {
   const { user } = res.locals.authContext as AuthContext;
   const members = await getMyUnregisteredFamilyMembers(user);
   res.status(200).json(members);
+});
+
+// 非登録メンバーを追加する。名前の入力チェックはschemaで行う。
+familyRouter.post("/families/me/unregistered-members", async (req, res) => {
+  const parsed = createUnregisteredMemberSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw Errors.VALIDATION_ERROR(
+      parsed.error.issues[0]?.message ?? "入力内容を確認してください。",
+    );
+  }
+  const { user } = res.locals.authContext as AuthContext;
+  const member = await addMyUnregisteredFamilyMember(parsed.data, user);
+  res.status(201).json(member);
+});
+
+// 非登録メンバーを削除する。
+familyRouter.delete("/families/me/unregistered-members/:id", async (req, res) => {
+  const memberId = Number(req.params.id);
+  if (!Number.isInteger(memberId) || memberId <= 0) {
+    throw Errors.VALIDATION_ERROR("削除する非登録メンバーが正しくありません。");
+  }
+  const { user } = res.locals.authContext as AuthContext;
+  await removeMyUnregisteredFamilyMember(memberId, user);
+  res.status(204).end();
+});
+
+// 招待コードを再発行する。
+familyRouter.post("/families/me/invite", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  const family = await renewMyFamilyInviteCode(user);
+  res.status(200).json(family);
+});
+
+// 自分を家族グループから退出させる。
+familyRouter.post("/families/me/leave", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  await leaveMyFamily(user);
+  res.status(204).end();
+});
+
+// 作成者が家族グループ全体を削除する。
+familyRouter.delete("/families/me", async (_req, res) => {
+  const { user } = res.locals.authContext as AuthContext;
+  await deleteMyFamily(user);
+  res.status(204).end();
 });

@@ -22,3 +22,14 @@ export const joinFamilySchema = z.object({
 });
 
 export type JoinFamilyInput = z.infer<typeof joinFamilySchema>;
+
+// POST /families/me/unregistered-members のリクエストボディ。
+export const createUnregisteredMemberSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "名前を入力してください。")
+    .max(20, "名前は20文字以内で入力してください。"),
+});
+
+export type CreateUnregisteredMemberInput = z.infer<typeof createUnregisteredMemberSchema>;
