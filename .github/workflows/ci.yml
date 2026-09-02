@@ -81,6 +81,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 未適用のマイグレーションだけが実行されるため、複数回実行しても安全。
+      - name: Apply D1 migrations
+        run: pnpm --filter backend exec wrangler d1 migrations apply family-todo-db --remote
+
       - name: Deploy backend (Cloudflare Workers)
         run: pnpm --filter backend run deploy
 
