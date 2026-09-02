@@ -6,13 +6,14 @@
   "compatibility_flags": ["nodejs_compat"],
 
   // ローカル開発は `pnpm --filter backend dev`（= wrangler dev）でこのバインディングをそのまま使える。
-  // 実機の D1 を初めて用意するときは `pnpm --filter backend exec wrangler d1 create family-todo-db` を実行し、
-  // 出力された database_id を下の値へ転記する（手順の実測は docs/todo/notes/cloudflare-workers-検証.md 参照）。
+  // 本番用のD1は2026-09-02にCloudflareダッシュボードで作成済み。マイグレーションの反映は
+  // GitHub Actionsのdeployジョブが `wrangler d1 migrations apply --remote` で毎回自動的に行う
+  // （.github/workflows/ci.yml 参照。未適用分だけが実行されるため、複数回実行しても安全）。
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "family-todo-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "c3044525-90de-4456-a159-83a75412a79a",
       "migrations_dir": "migrations",
     },
   ],
