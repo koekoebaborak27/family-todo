@@ -105,7 +105,7 @@ export async function leaveMyFamily(user: AuthenticatedUser): Promise<void> {
 export async function deleteMyFamily(user: AuthenticatedUser): Promise<void> {
   const family = await getMyFamily(user);
   if (family.createdByUserId !== user.id) {
-    throw Errors.FORBIDDEN("家族グループを削除できるのは作成者だけです。");
+    throw Errors.FORBIDDEN("家族グループを削除できるのは、グループを作成した人だけです。");
   }
   await deleteFamilyRow(family.id);
 }

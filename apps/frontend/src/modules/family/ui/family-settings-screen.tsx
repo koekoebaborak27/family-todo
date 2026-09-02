@@ -33,6 +33,7 @@ import {
   renewFamilyInviteCode,
 } from "../api-client";
 import type { FamilyDetail, FamilyMember, UnregisteredFamilyMember } from "../api-client";
+import { FAMILY_ERROR_MESSAGES } from "../service";
 import { validateUnregisteredMemberName } from "../validation";
 
 type Phase = "checking" | "loading" | "ready" | "error";
@@ -107,6 +108,17 @@ export function FamilySettingsScreen() {
       .catch(() => router.replace("/"));
   }, [loadSettings, router]);
 
+  // セッション失効（401）を、ログイン画面への遷移として共通処理する。
+  // 該当すればtrueを返す（呼び出し側はそれ以上のエラー表示をしない）。
+  function handleUnauthorized(error: FamilyError): boolean {
+    if (error.status !== 401) {
+      return false;
+    }
+    toast.error(FAMILY_ERROR_MESSAGES.unauthorized);
+    router.replace("/");
+    return true;
+  }
+
   // 非登録メンバーの追加フォームを送信する。
   function handleAddMember(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -124,6 +136,9 @@ export function FamilySettingsScreen() {
         toast.success("非登録メンバーを追加しました。");
       })
       .catch((error: FamilyError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
         if (error.placement === "field") {
           setNameError(error.message);
           return;
@@ -154,6 +169,9 @@ export function FamilySettingsScreen() {
         setDialogKind(null);
       })
       .catch((error: FamilyError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
         toast.error(
           error.status === 404
             ? "この非登録メンバーは削除されています。"
@@ -191,7 +209,12 @@ export function FamilySettingsScreen() {
         toast.success("招待コードを再発行しました。");
         setDialogKind(null);
       })
-      .catch(() => toast.error("招待コードの再発行に失敗しました。もう一度お試しください。"))
+      .catch((error: FamilyError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
+        toast.error("招待コードの再発行に失敗しました。もう一度お試しください。");
+      })
       .finally(() => setProcessing(false));
   }
 
@@ -203,7 +226,12 @@ export function FamilySettingsScreen() {
         toast.success("家族グループから退出しました。");
         router.replace("/family/setup");
       })
-      .catch(() => toast.error("退出に失敗しました。もう一度お試しください。"))
+      .catch((error: FamilyError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
+        toast.error("退出に失敗しました。もう一度お試しください。");
+      })
       .finally(() => setProcessing(false));
   }
 
@@ -215,7 +243,12 @@ export function FamilySettingsScreen() {
         toast.success("家族グループを削除しました。");
         router.replace("/family/setup");
       })
-      .catch(() => toast.error("家族グループの削除に失敗しました。もう一度お試しください。"))
+      .catch((error: FamilyError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
+        toast.error("家族グループの削除に失敗しました。もう一度お試しください。");
+      })
       .finally(() => setProcessing(false));
   }
 
