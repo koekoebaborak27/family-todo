@@ -16,6 +16,8 @@ pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packa
 
 要件定義の8画面のうち、実装済みのものだけを載せる。残りは [`docs/todo/TODO.md`](docs/todo/TODO.md)「次にやること」を参照。
 
+画面のほかに、期限が近づいた・期限を過ぎたToDoをPush通知で知らせる定期処理（15分おき）が Cloudflare Workers 上で動く → [`docs/specs/03_detail-design/family-todo/20_通知バッチ処理.md`](docs/specs/03_detail-design/family-todo/20_通知バッチ処理.md)
+
 | 画面 | ルート | 内容 |
 |---|---|---|
 | ログイン | `/`（ログイン後の戻り先: `/auth/callback`） | Googleログイン。所属グループの有無で遷移先を振り分ける → [`docs/specs/02_basic-design/family-todo/10_ログイン.md`](docs/specs/02_basic-design/family-todo/10_ログイン.md) |
