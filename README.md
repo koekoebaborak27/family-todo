@@ -161,7 +161,7 @@ pnpm test:e2e         # Playwright（画面操作）
 
 本番リソースの一覧・設定手順・踏んだ落とし穴は [`docs/todo/notes/cloudflare本番デプロイ.md`](docs/todo/notes/cloudflare本番デプロイ.md) にまとめている。
 
-> **注意**: Google ログインは「テスト中」ステータスのため、ログインする人の Google アカウントを [Google Auth Platform](https://console.cloud.google.com/auth/audience) の「テストユーザー」へ事前に追加する必要がある。
+> **注意**: Google ログインは「テスト中」ステータスのため、ログインする人の Google アカウントを [Google Auth Platform](https://console.cloud.google.com/auth/audience) の「テストユーザー」へ事前に追加する必要がある（[登録手順](docs/todo/notes/cloudflare本番デプロイ.md#2026-09-02-家族にログインしてもらうためのテストユーザー登録手順)）。
 
 ## ライセンス
 
