@@ -160,10 +160,28 @@ describe("todo/api-client fetchTodos", () => {
 });
 
 describe("todo/api-client completeTodo", () => {
-  describe("200が返るとき", () => {
-    it("何も返さず正常終了する", async () => {
-      mockFetchOnce({ ok: true, status: 200 });
-      await expect(completeTodo(1)).resolves.toBeUndefined();
+  describe("200が返るとき（繰り返し設定なし）", () => {
+    it("recurring: false, nextDueAt: null を返す", async () => {
+      mockFetchOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ recurring: false, nextDueAt: null }),
+      });
+      await expect(completeTodo(1)).resolves.toEqual({ recurring: false, nextDueAt: null });
+    });
+  });
+
+  describe("200が返るとき（繰り返し設定あり）", () => {
+    it("recurring: true と次回の期限を返す", async () => {
+      mockFetchOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ recurring: true, nextDueAt: "2026-09-04T15:00:00.000Z" }),
+      });
+      await expect(completeTodo(1)).resolves.toEqual({
+        recurring: true,
+        nextDueAt: "2026-09-04T15:00:00.000Z",
+      });
     });
   });
 

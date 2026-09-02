@@ -98,8 +98,8 @@ todoRouter.put("/todos/:id/assignees", async (req, res) => {
 todoRouter.post("/todos/:id/complete", async (req, res) => {
   const todoId = parseTodoId(req.params.id);
   const { user } = res.locals.authContext as AuthContext;
-  await completeTodo(todoId, user);
-  res.status(204).end();
+  const result = await completeTodo(todoId, user);
+  res.status(200).json(result);
 });
 
 todoRouter.post("/todos/:id/incomplete", async (req, res) => {

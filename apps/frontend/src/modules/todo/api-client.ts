@@ -71,7 +71,7 @@ export async function fetchTodos(status: StatusTab, categoryId: number | null): 
   return (await response.json()) as Todo[];
 }
 
-async function postComplete(todoId: number, action: "complete" | "incomplete"): Promise<void> {
+async function postComplete(todoId: number, action: "complete" | "incomplete"): Promise<Response> {
   const response = await fetch(`${API_BASE_URL}/api/v1/todos/${todoId}/${action}`, {
     method: "POST",
     credentials: "include",
@@ -88,14 +88,20 @@ async function postComplete(todoId: number, action: "complete" | "incomplete"): 
   if (!response.ok) {
     throw new TodoError(TODO_ERROR_MESSAGES.updateFailed, "server");
   }
+  return response;
 }
 
-export function completeTodo(todoId: number): Promise<void> {
-  return postComplete(todoId, "complete");
+// ToDoを完了にする。繰り返し設定があるToDoは完了にならず、次回の期限が返る
+// （docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md「8. DBへの影響」）。
+export async function completeTodo(
+  todoId: number,
+): Promise<{ recurring: boolean; nextDueAt: string | null }> {
+  const response = await postComplete(todoId, "complete");
+  return (await response.json()) as { recurring: boolean; nextDueAt: string | null };
 }
 
-export function incompleteTodo(todoId: number): Promise<void> {
-  return postComplete(todoId, "incomplete");
+export async function incompleteTodo(todoId: number): Promise<void> {
+  await postComplete(todoId, "incomplete");
 }
 
 // ToDoを削除する。

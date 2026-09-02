@@ -58,6 +58,9 @@ app.use("/api/v1/categories", requireAuth);
 app.use("/api/v1", categoryRouter);
 
 app.use("/api/v1/todos", requireAuth);
+// todoRouterはコメント操作（PATCH/DELETE /comments/:id）も/todosとは別パスで持つため、
+// 個別にrequireAuthを掛ける（漏らすとres.locals.authContextが無いままハンドラに入り500になる）。
+app.use("/api/v1/comments", requireAuth);
 app.use("/api/v1", todoRouter);
 
 app.use("/api/v1/push-subscriptions", requireAuth);
