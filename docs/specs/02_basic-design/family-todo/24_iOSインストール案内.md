@@ -14,8 +14,8 @@ iOSではホーム画面に追加していないとWeb Push通知を受け取れ
 
 次の条件を**すべて**満たすときに表示する。
 
-1. iOS（iPhone / iPad）のSafariで開いている。
-2. ホーム画面に追加した状態で開いていない（`display-mode: standalone` ではない）。
+1. iOS（iPhone / iPad / iPod）で開いている（User-Agentに`iPhone`・`iPad`・`iPod`のいずれかを含むかで判定する。iOS上のブラウザはSafari以外もすべてWebKitベースでホーム画面への追加手順が共通のため、Safariに限定せずiOS上の全ブラウザを対象にする）。
+2. ホーム画面に追加した状態で開いていない（`navigator.standalone`が`true`ではない。このプロパティはSafari固有のため、iOS上の他ブラウザでは常に「未追加」として扱われる）。
 3. 「閉じる」を押してから7日が経過している、または一度も閉じていない。
 
 表示する画面:
