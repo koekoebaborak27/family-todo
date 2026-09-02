@@ -85,8 +85,27 @@ jobs:
       - name: Apply D1 migrations
         run: pnpm --filter backend exec wrangler d1 migrations apply family-todo-db --remote
 
+      # 公開しても問題ない設定値は apps/backend/wrangler.jsonc の vars に置いている。
+      # ここで登録するのは、リポジトリに置けない本当の秘密の値だけ。
+      # 毎回上書き登録することで、GitHubのSecretsを唯一の正としてCloudflare側と揃える。
+      - name: Set backend secrets (Cloudflare Workers)
+        env:
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+        run: |
+          printf '%s' "$GOOGLE_CLIENT_SECRET" | pnpm --filter backend exec wrangler secret put GOOGLE_CLIENT_SECRET
+          printf '%s' "$VAPID_PRIVATE_KEY" | pnpm --filter backend exec wrangler secret put VAPID_PRIVATE_KEY
+          printf '%s' "$VAPID_SUBJECT" | pnpm --filter backend exec wrangler secret put VAPID_SUBJECT
+
       - name: Deploy backend (Cloudflare Workers)
         run: pnpm --filter backend run deploy
 
+      # NEXT_PUBLIC_ で始まる値は、ビルド時にJavaScriptへ埋め込まれる（実行時には差し替えられない）。
+      # そのためデプロイのたびにここで渡す必要がある。いずれもブラウザに渡る公開情報。
       - name: Deploy frontend (Cloudflare Workers, OpenNext)
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://family-todo-backend.koekoe-app.workers.dev
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: 7906177976-p7okj9rtv4hebh9an90s1eb37qb1939j.apps.googleusercontent.com
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: BD9_l_rqGhjVwnZ3cF7z1uFYHLUZ0dYTcHohtEUEAWpsQ-VLRbL3j5DP4BspldWQl-HOECQYSgsxBaMqB_tbYec
         run: pnpm --filter frontend run deploy

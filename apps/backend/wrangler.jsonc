@@ -5,6 +5,18 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // 本番用の設定値のうち、外部に見えても問題ないもの。
+  // GoogleのクライアントIDとVAPIDの公開鍵は、どちらもブラウザ側に渡る前提の公開情報。
+  // 本当に秘密の値（GOOGLE_CLIENT_SECRET・VAPID_PRIVATE_KEY・VAPID_SUBJECT）はここには書かず、
+  // GitHub Actionsのdeployジョブが `wrangler secret put` でCloudflareへ登録する。
+  // ローカル開発時はこの vars ではなく .dev.vars の値が使われる。
+  "vars": {
+    "GOOGLE_CLIENT_ID": "7906177976-p7okj9rtv4hebh9an90s1eb37qb1939j.apps.googleusercontent.com",
+    "GOOGLE_REDIRECT_URI": "https://family-todo-frontend.koekoe-app.workers.dev/auth/callback",
+    "FRONTEND_ORIGIN": "https://family-todo-frontend.koekoe-app.workers.dev",
+    "VAPID_PUBLIC_KEY": "BD9_l_rqGhjVwnZ3cF7z1uFYHLUZ0dYTcHohtEUEAWpsQ-VLRbL3j5DP4BspldWQl-HOECQYSgsxBaMqB_tbYec",
+  },
+
   // ローカル開発は `pnpm --filter backend dev`（= wrangler dev）でこのバインディングをそのまま使える。
   // 本番用のD1は2026-09-02にCloudflareダッシュボードで作成済み。マイグレーションの反映は
   // GitHub Actionsのdeployジョブが `wrangler d1 migrations apply --remote` で毎回自動的に行う
