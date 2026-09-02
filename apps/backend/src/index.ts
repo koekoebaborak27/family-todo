@@ -7,6 +7,7 @@ import { authRouter, verifySession } from "./modules/auth";
 import type { AuthContext } from "./modules/auth";
 import { categoryRouter } from "./modules/category";
 import { familyRouter } from "./modules/family";
+import { runNotificationBatch } from "./modules/notification";
 import { pushSubscriptionRouter } from "./modules/push-subscription";
 import { settingsRouter } from "./modules/settings";
 import { todoRouter } from "./modules/todo";
@@ -98,9 +99,13 @@ export default {
   fetch: httpHandler.fetch,
 
   // 期限接近・期限超過の通知バッチ（15分おき。wrangler.jsonc の triggers.crons で設定済み）。
-  // バッチ本体（対象抽出・送信・重複防止）は未実装。詳細設計:
-  // docs/specs/03_detail-design/family-todo/20_通知バッチ処理.md
-  async scheduled(_event, _env, _ctx) {
-    // TODO: 実装フェーズで対象抽出・送信処理を追加する。
+  // 詳細設計: docs/specs/03_detail-design/family-todo/20_通知バッチ処理.md
+  // 業務コードはログを出さない代わりに、失敗はここで1回だけ記録する（apps/backend/AGENTS.md「観測性（ログ）」）。
+  async scheduled(event, batchEnv, ctx) {
+    ctx.waitUntil(
+      runNotificationBatch(new Date(event.scheduledTime), batchEnv).catch((error: unknown) => {
+        console.error(error);
+      }),
+    );
   },
 } satisfies ExportedHandler<Env>;
