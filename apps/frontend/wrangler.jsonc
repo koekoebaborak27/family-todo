@@ -5,6 +5,12 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 
+  // ビルド時に関数名を保持する処理を止める。
+  // 有効なままだと、next-themes がHTMLへ埋め込む「表示直後に配色を決めるスクリプト」の中に
+  // ビルドツール専用の関数呼び出し（__name）が紛れ込み、ブラウザ側でエラーになる。
+  // 参考: https://github.com/pacocoursey/next-themes/issues/370
+  "keep_names": false,
+
   // OpenNextのビルド成果物（.open-next/assets）をそのまま静的配信する設定。
   "assets": {
     "directory": ".open-next/assets",
