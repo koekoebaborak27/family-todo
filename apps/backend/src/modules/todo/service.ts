@@ -2,6 +2,7 @@ import { ensureFamilyMembership } from "../../shared/auth/ensure-family-membersh
 import { Errors } from "../../shared/errors/app-error";
 import type { AuthenticatedUser } from "../auth";
 import {
+  advanceTodoDueDate,
   countCommentsForTodoIds,
   countValidAssignees,
   createCommentRow,
@@ -20,6 +21,7 @@ import {
   updateTodoRow,
   updateCommentRow,
 } from "./repository";
+import { calculateNextDueAt } from "./recurrence";
 import type { TodoAssigneeSummary, TodoDetail, TodoSummary } from "./types";
 import type {
   CreateTodoInput,
@@ -228,12 +230,33 @@ export async function updateTodoAssignees(
   await replaceTodoAssignees({ todoId, ...input });
 }
 
-// ToDoを完了にする。繰り返し設定を持つToDoの次回分の扱いはToDo追加・編集側の責務
-// （docs/specs/02_basic-design/family-todo/14_ToDo一覧.md「8. DBへの影響」）のため、ここでは扱わない。
-export async function completeTodo(todoId: number, user: AuthenticatedUser): Promise<void> {
+// ToDoを完了にする。繰り返し設定のあるToDoは完了にせず、期限を次回へ進める
+// （docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md「8. DBへの影響」）。
+export async function completeTodo(
+  todoId: number,
+  user: AuthenticatedUser,
+): Promise<{ recurring: boolean; nextDueAt: string | null }> {
   const familyId = ensureFamilyMembership(user);
-  await ensureTodoInMyFamily(todoId, familyId);
-  await markTodoCompleted(todoId, user.id);
+  const row = await findTodoRow(todoId);
+  if (!row || row.family_id !== familyId) {
+    throw Errors.NOT_FOUND("このToDoは削除されています。");
+  }
+
+  if (row.recurrence_type === "none") {
+    await markTodoCompleted(todoId, user.id);
+    return { recurring: false, nextDueAt: null };
+  }
+
+  const nextDueAt = calculateNextDueAt(
+    row.due_at as string,
+    row.due_has_time === 1,
+    row.recurrence_type as Exclude<TodoDetail["recurrenceType"], "none">,
+    row.recurrence_config === null
+      ? null
+      : (JSON.parse(row.recurrence_config) as TodoDetail["recurrenceConfig"]),
+  );
+  await advanceTodoDueDate(todoId, nextDueAt);
+  return { recurring: true, nextDueAt };
 }
 
 export async function incompleteTodo(todoId: number, user: AuthenticatedUser): Promise<void> {

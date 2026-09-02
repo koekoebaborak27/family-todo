@@ -4,8 +4,10 @@ import {
   emptyStateMessage,
   formatCommentDate,
   formatCompletedInfo,
+  formatCompletedInfoWithTime,
   formatCreatedInfo,
   formatDueAt,
+  formatShortDate,
   isOverdue,
   recurrenceDetailLabel,
   recurrenceLabel,
@@ -145,6 +147,20 @@ describe("todo/service formatDueAt", () => {
 describe("todo/service formatCompletedInfo", () => {
   it("「表示名 が M/D(曜日) に完了」の形式で返す", () => {
     expect(formatCompletedInfo("太郎", "2026-09-01T10:00:00")).toBe("太郎 が 9/1(火) に完了");
+  });
+});
+
+describe("todo/service formatCompletedInfoWithTime", () => {
+  it("「表示名 が M/D(曜日) HH:mm に完了」の形式で返す", () => {
+    expect(formatCompletedInfoWithTime("太郎", "2026-09-01T20:15:00")).toBe(
+      "太郎 が 9/1(火) 20:15 に完了",
+    );
+  });
+});
+
+describe("todo/service formatShortDate", () => {
+  it("「M/D(曜日)」の形式で返す", () => {
+    expect(formatShortDate("2026-09-04T00:00:00")).toBe("9/4(金)");
   });
 });
 

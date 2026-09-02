@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthenticatedUser } from "../auth";
 import {
+  advanceTodoDueDate,
   countCommentsForTodoIds,
   countValidAssignees,
   createCommentRow,
@@ -51,6 +52,7 @@ vi.mock("./repository", () => ({
   findTodoFamilyId: vi.fn(),
   markTodoCompleted: vi.fn(),
   markTodoIncomplete: vi.fn(),
+  advanceTodoDueDate: vi.fn(),
   createCommentRow: vi.fn(),
   deleteCommentRow: vi.fn(),
   deleteTodoRows: vi.fn(),
@@ -403,13 +405,13 @@ describe("todo/service completeTodo", () => {
   describe("グループ未所属のとき", () => {
     it("AppError(FORBIDDEN) を投げ、repositoryは呼ばない", async () => {
       await expect(completeTodo(1, unaffiliatedUser)).rejects.toMatchObject({ code: "FORBIDDEN" });
-      expect(findTodoFamilyId).not.toHaveBeenCalled();
+      expect(findTodoRow).not.toHaveBeenCalled();
     });
   });
 
   describe("ToDoが存在しないとき", () => {
     it("AppError(NOT_FOUND) を投げ、完了処理は行わない", async () => {
-      vi.mocked(findTodoFamilyId).mockResolvedValue(null);
+      vi.mocked(findTodoRow).mockResolvedValue(null);
 
       await expect(completeTodo(1, affiliatedUser)).rejects.toMatchObject({ code: "NOT_FOUND" });
       expect(markTodoCompleted).not.toHaveBeenCalled();
@@ -418,20 +420,42 @@ describe("todo/service completeTodo", () => {
 
   describe("ToDoが他グループのものであるとき", () => {
     it("AppError(NOT_FOUND) を投げ、完了処理は行わない", async () => {
-      vi.mocked(findTodoFamilyId).mockResolvedValue(999);
+      vi.mocked(findTodoRow).mockResolvedValue(makeTodoDetailRow({ family_id: 999 }));
 
       await expect(completeTodo(1, affiliatedUser)).rejects.toMatchObject({ code: "NOT_FOUND" });
       expect(markTodoCompleted).not.toHaveBeenCalled();
     });
   });
 
-  describe("正常系", () => {
-    it("自分のグループのToDoを完了にする", async () => {
-      vi.mocked(findTodoFamilyId).mockResolvedValue(10);
+  describe("繰り返し設定が「なし」のとき", () => {
+    it("自分のグループのToDoを完了にし、recurring: falseを返す", async () => {
+      vi.mocked(findTodoRow).mockResolvedValue(makeTodoDetailRow({ recurrence_type: "none" }));
 
-      await completeTodo(1, affiliatedUser);
-
+      await expect(completeTodo(1, affiliatedUser)).resolves.toEqual({
+        recurring: false,
+        nextDueAt: null,
+      });
       expect(markTodoCompleted).toHaveBeenCalledWith(1, affiliatedUser.id);
+      expect(advanceTodoDueDate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("繰り返し設定があるとき", () => {
+    it("完了にはせず、期限を次回へ進めてrecurring: trueと次回の期限を返す", async () => {
+      vi.mocked(findTodoRow).mockResolvedValue(
+        makeTodoDetailRow({
+          recurrence_type: "daily",
+          recurrence_config: null,
+          due_at: "2026-09-02T15:00:00.000Z", // JST 2026-09-03 00:00
+          due_has_time: 0,
+        }),
+      );
+
+      const result = await completeTodo(1, affiliatedUser);
+
+      expect(result).toEqual({ recurring: true, nextDueAt: "2026-09-03T15:00:00.000Z" });
+      expect(advanceTodoDueDate).toHaveBeenCalledWith(1, "2026-09-03T15:00:00.000Z");
+      expect(markTodoCompleted).not.toHaveBeenCalled();
     });
   });
 });

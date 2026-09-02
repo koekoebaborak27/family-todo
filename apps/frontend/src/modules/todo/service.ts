@@ -90,10 +90,27 @@ export function formatDueAt(dueAt: string, dueHasTime: boolean): string {
 }
 
 // 完了者・完了日時の表示文言（例: 「太郎 が 9/1(月) に完了」）。
+// ToDo一覧のカードで使う（docs/specs/02_basic-design/family-todo/14_ToDo一覧.md「3.6」は時刻を含めない表記）。
 export function formatCompletedInfo(displayName: string, completedAt: string): string {
   const date = new Date(completedAt);
   const datePart = `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]})`;
   return `${displayName} が ${datePart} に完了`;
+}
+
+// 完了者・完了日時の表示文言（時刻あり。例: 「太郎 が 9/1(月) 20:15 に完了」）。
+// ToDo詳細画面で使う（docs/specs/02_basic-design/family-todo/18_ToDo詳細.md「3.1」は時刻を含める表記）。
+export function formatCompletedInfoWithTime(displayName: string, completedAt: string): string {
+  const date = new Date(completedAt);
+  const datePart = `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]})`;
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${displayName} が ${datePart} ${hours}:${minutes} に完了`;
+}
+
+// 繰り返しToDoを完了操作したときの、次回の期限の表示文言（例: 「9/4(木)」）。
+export function formatShortDate(dateTime: string): string {
+  const date = new Date(dateTime);
+  return `${date.getMonth() + 1}/${date.getDate()}(${WEEKDAY_LABELS[date.getDay()]})`;
 }
 
 // 作成者と作成日時の表示文言を作る。

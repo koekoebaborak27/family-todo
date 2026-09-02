@@ -37,6 +37,7 @@ import {
 import { requestPushPermissionAndSubscribe } from "../push-subscription";
 import {
   emptyStateMessage,
+  formatShortDate,
   SORT_FIELD_LABELS,
   SORT_ORDER_LABELS,
   SORT_TAB_DEFAULTS,
@@ -171,16 +172,39 @@ export function TodoListScreen() {
     const wasIncomplete = todo.status === "incomplete";
     setTodos((prev) => prev.filter((item) => item.id !== todo.id));
 
-    const request = wasIncomplete ? completeTodo(todo.id) : incompleteTodo(todo.id);
-    request
-      .then(() => {
-        if (wasIncomplete) {
+    if (wasIncomplete) {
+      completeTodo(todo.id)
+        .then((result) => {
+          if (result.recurring && result.nextDueAt) {
+            // 繰り返しToDoは完了にならず一覧に残るため、外した表示を取り消して最新の期限で取り直す
+            // （docs/specs/02_basic-design/family-todo/16_ToDo追加・編集.md「8. DBへの影響」）。
+            toast.success(`完了にしました。次回は ${formatShortDate(result.nextDueAt)} です。`);
+            loadTodos();
+            return;
+          }
           toast.success(TODO_TOAST_MESSAGES.completed, {
             action: { label: "元に戻す", onClick: () => handleUndo(todo) },
           });
-        } else {
-          toast.success(TODO_TOAST_MESSAGES.incomplete);
-        }
+        })
+        .catch((error: TodoError) => {
+          setTodos((prev) => [...prev, todo]);
+          if (error.kind === "unauthorized") {
+            router.replace("/");
+            return;
+          }
+          if (error.kind === "notFound") {
+            toast.error(error.message);
+            loadTodos();
+            return;
+          }
+          toast.error(TODO_ERROR_MESSAGES.updateFailed);
+        });
+      return;
+    }
+
+    incompleteTodo(todo.id)
+      .then(() => {
+        toast.success(TODO_TOAST_MESSAGES.incomplete);
       })
       .catch((error: TodoError) => {
         setTodos((prev) => [...prev, todo]);

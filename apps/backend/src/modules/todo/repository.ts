@@ -324,6 +324,21 @@ export async function markTodoCompleted(todoId: number, userId: number): Promise
     .run();
 }
 
+// 繰り返し設定のあるToDoを完了操作したときに、次回の期限へ進める。
+// 完了扱いにはしないため、status・completed_by_user_id・completed_atは変更しない。
+// due_soon_notified_at・overdue_notified_atは、新しい期限に対して通知判定をやり直せるようNULLに戻す
+// （docs/specs/03_detail-design/family-todo/10_繰り返しToDoの期限計算.md「DBへの影響」）。
+export async function advanceTodoDueDate(todoId: number, nextDueAt: string): Promise<void> {
+  await getDb()
+    .prepare(
+      `UPDATE todos
+       SET due_at = ?, updated_at = CURRENT_TIMESTAMP, due_soon_notified_at = NULL, overdue_notified_at = NULL
+       WHERE id = ?`,
+    )
+    .bind(nextDueAt, todoId)
+    .run();
+}
+
 export async function markTodoIncomplete(todoId: number): Promise<void> {
   await getDb()
     .prepare(

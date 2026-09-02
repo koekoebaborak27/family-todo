@@ -32,9 +32,10 @@ import {
 import {
   assigneeLabel,
   formatCommentDate,
-  formatCompletedInfo,
+  formatCompletedInfoWithTime,
   formatCreatedInfo,
   formatDueAt,
+  formatShortDate,
   isOverdue,
   PRIORITY_LABELS,
   recurrenceDetailLabel,
@@ -90,8 +91,12 @@ export function TodoDetailScreen({ todoId }: { todoId: number }) {
     if (!todo) return;
     try {
       if (todo.status === "incomplete") {
-        await completeTodo(todo.id);
-        toast.success("完了にしました。");
+        const result = await completeTodo(todo.id);
+        toast.success(
+          result.recurring && result.nextDueAt
+            ? `完了にしました。次回は ${formatShortDate(result.nextDueAt)} です。`
+            : "完了にしました。",
+        );
       } else {
         await incompleteTodo(todo.id);
         toast.success("未完了に戻しました。");
@@ -237,7 +242,7 @@ export function TodoDetailScreen({ todoId }: { todoId: number }) {
         <h1 className="text-2xl font-semibold break-words">{todo.title}</h1>
         {todo.status === "completed" && todo.completedByDisplayName && todo.completedAt && (
           <p className="text-sm text-muted-foreground">
-            {formatCompletedInfo(todo.completedByDisplayName, todo.completedAt)}
+            {formatCompletedInfoWithTime(todo.completedByDisplayName, todo.completedAt)}
           </p>
         )}
         <dl className="grid gap-3 text-sm">
