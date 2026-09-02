@@ -67,3 +67,9 @@ docs/test/unit/result/*
 # === Next.js（apps/frontend） ===
 # next dev / next build のたびに自動生成される型定義ファイル。
 next-env.d.ts
+
+# === OpenNext（apps/frontend、Cloudflareへのデプロイ用） ===
+# opennextjs-cloudflare build のビルド成果物。
+.open-next/
+# wrangler types のたびに自動生成される、Cloudflare bindingの型定義ファイル。
+cloudflare-env.d.ts

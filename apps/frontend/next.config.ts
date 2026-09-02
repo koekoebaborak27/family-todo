@@ -7,3 +7,8 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// `next dev` でもCloudflareのbinding（KV・R2等）をローカルで使えるようにする。
+// 今のところbindingは使っていないが、OpenNextの標準セットアップとして入れておく。
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

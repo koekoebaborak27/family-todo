@@ -14,6 +14,8 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+  # Actionsタブの「Run workflow」ボタンから、mainへのマージを待たずに手動でも実行できるようにする。
+  workflow_dispatch:
 
 jobs:
   verify:
@@ -52,3 +54,35 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  # verify（lint/format/typecheck/test/build）が通ったあと、Cloudflareへ反映する。
+  # 実行条件: mainへのpush（自動）、またはActionsタブからの手動実行（workflow_dispatch）。
+  # PRの検証実行（pull_request）では動かさない。
+  deploy:
+    needs: verify
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy backend (Cloudflare Workers)
+        run: pnpm --filter backend run deploy
+
+      - name: Deploy frontend (Cloudflare Workers, OpenNext)
+        run: pnpm --filter frontend run deploy
