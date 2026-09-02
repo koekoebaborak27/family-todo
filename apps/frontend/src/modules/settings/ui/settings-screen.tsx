@@ -114,6 +114,17 @@ export function SettingsScreen() {
       .catch(() => router.replace("/"));
   }, [loadSettings, router]);
 
+  // セッション失効（401）を、ログイン画面への遷移として共通処理する。
+  // 該当すればtrueを返す（呼び出し側はそれ以上のエラー表示をしない）。
+  function handleUnauthorized(error: SettingsError): boolean {
+    if (error.status !== 401) {
+      return false;
+    }
+    toast.error(SETTINGS_ERROR_MESSAGES.unauthorized);
+    router.replace("/");
+    return true;
+  }
+
   // 指定した通知設定を現在の配列から取り出す。
   function getSetting(type: NotificationType): NotificationSetting {
     return (
@@ -144,6 +155,9 @@ export function SettingsScreen() {
         toast.success("表示名を変更しました。");
       })
       .catch((requestError: SettingsError) => {
+        if (handleUnauthorized(requestError)) {
+          return;
+        }
         if (requestError.status === 400) {
           setDisplayNameError(requestError.message);
           return;
@@ -198,7 +212,12 @@ export function SettingsScreen() {
         );
         toast.success("リマインドのタイミングを変更しました。");
       })
-      .catch(() => toast.error("通知設定の保存に失敗しました。もう一度お試しください。"));
+      .catch((error: SettingsError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
+        toast.error("通知設定の保存に失敗しました。もう一度お試しください。");
+      });
   }
 
   // 日付だけの期限に使う基準時刻を保存する。
@@ -209,11 +228,18 @@ export function SettingsScreen() {
         setProfile((current) => (current ? { ...current, defaultDueTime: value } : current));
         toast.success("基準時刻を変更しました。");
       })
-      .catch(() => toast.error("基準時刻の保存に失敗しました。もう一度お試しください。"))
+      .catch((error: SettingsError) => {
+        if (handleUnauthorized(error)) {
+          return;
+        }
+        toast.error("基準時刻の保存に失敗しました。もう一度お試しください。");
+      })
       .finally(() => setSavingDueTime(false));
   }
 
   // ブラウザの通知許可を求め、結果を表示へ反映する。
+  // 「拒否された」（許可リクエスト自体の結果）と「購読情報の登録に失敗」（許可後のサーバー登録）を
+  // 別のメッセージにするため、許可後の処理は内側のcatchで別扱いにする。
   function handleRequestPushPermission() {
     Notification.requestPermission()
       .then((permission) => {
@@ -222,12 +248,19 @@ export function SettingsScreen() {
           toast.error("通知が許可されませんでした。ブラウザの設定から許可できます。");
           return;
         }
-        return subscribePushNotifications().then((subscribed) => {
-          if (!subscribed) {
-            throw new Error("購読情報を取得できませんでした。");
-          }
-          toast.success("この端末で通知を受け取れるようになりました。");
-        });
+        subscribePushNotifications()
+          .then((subscribed) => {
+            if (!subscribed) {
+              throw new Error("購読情報を取得できませんでした。");
+            }
+            toast.success("この端末で通知を受け取れるようになりました。");
+          })
+          .catch((error: unknown) => {
+            if (error instanceof SettingsError && handleUnauthorized(error)) {
+              return;
+            }
+            toast.error("通知の設定に失敗しました。もう一度お試しください。");
+          });
       })
       .catch(() => toast.error("通知が許可されませんでした。ブラウザの設定から許可できます。"));
   }

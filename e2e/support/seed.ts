@@ -37,6 +37,15 @@ export function createSeedUser(options: { slug: string; displayName: string }): 
     `INSERT INTO sessions (id, user_id, expires_at) VALUES (${sqlString(sessionId)}, ${userId}, ${sqlString(futureIso(365))});`,
   );
 
+  // 実際のGoogleログイン時のseed（apps/backend/src/modules/auth/repository.ts の
+  // createUserWithDefaultNotificationSettings）と同じ既定値を、通知設定4種別に投入する。
+  execSql(`
+    INSERT INTO notification_settings (user_id, notification_type, enabled) VALUES (${userId}, 'todo_added', 1);
+    INSERT INTO notification_settings (user_id, notification_type, enabled) VALUES (${userId}, 'assignee_set', 1);
+    INSERT INTO notification_settings (user_id, notification_type, enabled, remind_before_value, remind_before_unit) VALUES (${userId}, 'due_soon', 1, 1, 'days');
+    INSERT INTO notification_settings (user_id, notification_type, enabled) VALUES (${userId}, 'overdue', 1);
+  `);
+
   return { userId, sessionId, googleSub };
 }
 
