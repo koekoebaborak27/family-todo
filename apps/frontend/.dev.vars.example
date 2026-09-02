@@ -1,0 +1,6 @@
+# wrangler dev / next dev（OpenNextのCloudflare連携）が読み込む環境変数の見本。
+# 実際の値を書いた .dev.vars はコミットしない（.gitignore で除外済み）。
+# 使い方: このファイルを .dev.vars という名前でコピーする。
+
+# .env系の読み込み対象をどの環境にするか（省略時は production 扱いになる）。
+NEXTJS_ENV=development

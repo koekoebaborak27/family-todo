@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "family-todo-frontend",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // OpenNextのビルド成果物（.open-next/assets）をそのまま静的配信する設定。
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+
+  // 期限つき再検証（ISR）のバックグラウンド更新で、Worker自身を呼び出すために使う。
+  // このアプリは今のところ全ページがログイン状態に応じた動的レンダリングで、
+  // ISR/SSGのページを持たないため、KV・R2を使ったキャッシュ設定は行っていない
+  // （必要になったら docs/specs/02_basic-design/ に方針を書いてから追加する）。
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "family-todo-frontend",
+    },
+  ],
+
+  // next/image の最適化をWorkers上で行うための設定。
+  "images": {
+    "binding": "IMAGES",
+  },
+}
