@@ -11,10 +11,27 @@ const mPlusRounded = M_PLUS_Rounded_1c({
   weight: ["500", "700"],
 });
 
+// ブラウザとiPhone/iPadで使う、PWA用のアイコンを登録する。
 export const metadata: Metadata = {
   title: "家族 de TODO！",
   description: "家族間で日常のちょっとしたToDoを共有・管理するアプリ",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      {
+        url: "/images/todo-app-icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/images/todo-app-icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
