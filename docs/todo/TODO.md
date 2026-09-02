@@ -23,7 +23,7 @@
 | 区分            | 進捗                                                                                                                                                                |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 要件定義（未決事項の確定） | 8 / 8（完了）                                                                                                                                                         |
-| 基本設計〜デプロイ     | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築・8画面の実装・UI見直し・単体テスト 完了。結合テストは着手（8画面中7画面完了）。CI/CD・デプロイは未着手 |
+| 基本設計〜デプロイ     | 画面遷移・DB・API概要・画面別基本設計・インフラ関連の技術検証3件・詳細設計3件・開発環境構築・8画面の実装・UI見直し・単体テスト・結合テスト（8画面すべて）・CI/CD構築・Cloudflareへの初回デプロイ完了。本番での動作確認と通知バッチ本体の実装は未着手 |
 
 ## 次にやること
 
@@ -32,12 +32,12 @@
 ```powershell
 git log --oneline -1     # 現在のコミット
 git status --porcelain   # 未コミット差分がないか確認
-pnpm install
-pnpm dev:backend          # 別ターミナルで: http://localhost:8787
-pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
+gh run list --branch main --limit 3   # 直近のデプロイが成功しているか
 ```
 
-次の宿題は「結合テスト（Playwrightによる画面テスト）を行う」の続き。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集・ToDo詳細・家族グループ設定・個人設定の7画面は完了済み（`e2e/auth/`・`e2e/todo/`・`e2e/family/`・`e2e/settings/`、共通ヘルパーは`e2e/support/`。[PR #14](https://github.com/koekoebaborak27/family-todo/pull/14)・[PR #15](https://github.com/koekoebaborak27/family-todo/pull/15)・[PR #16](https://github.com/koekoebaborak27/family-todo/pull/16)・[PR #17](https://github.com/koekoebaborak27/family-todo/pull/17)で`main`マージ済み）。残り1画面（iOSインストール案内）で結合テストが完了する。`@docs/skills/create-unit-test-spec.md`で仕様書を作ってから`@docs/skills/playwright-evidence-test.md`でテストする（ログイン方法は引き続き実Googleアカウントが使えないため、`e2e/support/seed.ts`のローカルD1セッション直接投入の仕組みを再利用する）。
+CI/CDの構築とCloudflareへの初回デプロイが完了し、本番が動く状態になった（https://family-todo-frontend.koekoe-app.workers.dev ）。`main`へマージすると、テスト通過後に自動でD1マイグレーション適用・Backend・Frontendのデプロイまで走る。手動で流したい場合はGitHubのActionsタブから「Run workflow」を押す。設定値の置き場所と落とし穴は[`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md)にまとめた。
+
+次の宿題は**本番環境での動作確認**。Googleログイン（実アカウント）からToDo操作までを一通り確認する。Google OAuthは「テスト中」ステータスのため、ログインする人のGoogleアカウントを[Google Auth Platform](https://console.cloud.google.com/auth/audience)の「テストユーザー」へ事前に追加する必要がある。その後の実装タスクは「通知バッチ本体の実装」（[`apps/backend/src/index.ts`](../../apps/backend/src/index.ts)の`scheduled`が空のまま。詳細設計は[`20_通知バッチ処理.md`](../specs/03_detail-design/family-todo/20_通知バッチ処理.md)）。
 
 - [x] 1. [要件定義書](../specs/01_requirements/family-todo/01_家族todo共有アプリ.md)の「17. 未決事項」を確定させた（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-要件定義の未決事項8件を確定)
 - [x] 2. 基本設計（画面遷移・API仕様・DBスキーマ概要）とデザイントークンを決定した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
@@ -63,6 +63,8 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 - [x] 22. 結合テストを続ける（ToDo詳細の1画面を実施した。コメント編集・削除APIが常に500エラーになる不具合を発見・修正した。設計書と実装の食い違い2件は設計書どおりに実装した。残り3画面は未着手）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightをtodo詳細で実施)
 - [x] 23. 結合テストを続ける（家族グループ設定の1画面を実施した。設計書と実装の食い違い3件のうち2件を設計書どおりに実装した。残り2画面は未着手）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを家族グループ設定で実施)
 - [x] 24. 結合テストを続ける（個人設定の1画面を実施した。設計書と実装の食い違い2件を設計書どおりに実装した。e2eテストの共通ヘルパーの不整合（通知設定の初期データ未投入）も発見・修正した。残り1画面は未着手）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを個人設定で実施)
+- [x] 25. 結合テストを完了する（iOSインストール案内の1画面を実施した。設計書と実装の食い違い1件（表示条件のUser-Agent判定範囲）を実装どおりに設計書を修正した。これで8画面すべての結合テストが完了）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightをiosインストール案内で実施)
+- [x] 26. GitHub ActionsによるCI/CDを構築し、Cloudflareへ初回デプロイした（FrontendはWorkers + OpenNext方式に決定。本番用のD1・Google OAuth・VAPIDの設定まで含む）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-cicdを構築しcloudflareへ初回デプロイ)
 
 ## 残っているタスク
 
@@ -81,9 +83,12 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 - [x] 実装する（8画面すべて実装完了。最後にiOSインストール案内を実装した）（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装)
 - [x] UI見直し。一通り画面を確認し、違和感のある画面はデザインを検討しなおす（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認)
 - [x] 単体テスト（Vitestによるロジックテスト）を作成・実行する（2026-09-01）→ [履歴](history/2026-09.md#2026-09-01-単体テストのカバレッジ漏れを補う) [履歴](history/2026-09.md#2026-09-01-既存の単体テストに境界値異常系の抜けを補う)
-- [ ] 結合テスト（Playwrightによる画面テスト）を行う（ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集・ToDo詳細・家族グループ設定・個人設定の7画面は完了（2026-09-01〜2026-09-02）→ [履歴](history/2026-09.md#2026-09-01-結合テストplaywrightをログインtodo一覧の2画面で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを家族グループ作成参加todo追加編集の2画面で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightをtodo詳細で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを家族グループ設定で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを個人設定で実施)。残り1画面: iOSインストール案内）
-- [ ] GitHub Actions による CI/CD を構築する
-- [ ] Cloudflare へデプロイする
+- [x] 結合テスト（Playwrightによる画面テスト）を行う（8画面すべて完了）（2026-09-01〜2026-09-02）→ [履歴](history/2026-09.md#2026-09-01-結合テストplaywrightをログインtodo一覧の2画面で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを家族グループ作成参加todo追加編集の2画面で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightをtodo詳細で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを家族グループ設定で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightを個人設定で実施) [履歴](history/2026-09.md#2026-09-02-結合テストplaywrightをiosインストール案内で実施)
+- [x] GitHub Actions による CI/CD を構築する（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-cicdを構築しcloudflareへ初回デプロイ)
+- [x] Cloudflare へデプロイする（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-cicdを構築しcloudflareへ初回デプロイ)
+- [ ] 本番環境で動作確認する（実Googleアカウントでのログイン、家族グループ作成、ToDo操作。ログインする人はGoogle Auth Platformの「テストユーザー」への追加が必要）
+- [ ] 通知バッチ本体を実装する（[`apps/backend/src/index.ts`](../../apps/backend/src/index.ts)の`scheduled`が空。詳細設計は[`20_通知バッチ処理.md`](../specs/03_detail-design/family-todo/20_通知バッチ処理.md)）
+- [ ] 独自ドメインを取得し、Google OAuthを本番公開する（任意。テストユーザー登録を不要にしたくなったら着手する。要件は[`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md)）
 
 ## 現在の状態
 
@@ -91,10 +96,10 @@ pnpm dev:frontend         # 別ターミナルで: http://localhost:3000
 
 | 項目 | 状態 |
 | --- | --- |
-| 作業ブランチ | `main`（[PR #14](https://github.com/koekoebaborak27/family-todo/pull/14)〜[PR #17](https://github.com/koekoebaborak27/family-todo/pull/17) マージ済み。ログイン・ToDo一覧・家族グループ作成参加・ToDo追加編集・ToDo詳細・家族グループ設定・個人設定の結合テストと、実ブラウザでのToDo担当者編集を常に失敗させていたCORS設定不備の修正、コメント編集・削除APIが常に500エラーになっていた不具合の修正、家族グループ設定・個人設定の各操作中の401処理の修正、Push通知の登録失敗メッセージの修正を含む） |
+| 作業ブランチ | `main`（[PR #14](https://github.com/koekoebaborak27/family-todo/pull/14)〜[PR #22](https://github.com/koekoebaborak27/family-todo/pull/22) マージ済み。8画面すべての結合テストと、そこで見つかった不具合の修正（CORS設定不備・コメント編集削除APIの500エラー・401処理・Push通知の登録失敗メッセージ・iOSインストール案内の設計書修正）、およびCI/CDの構築とCloudflareへの初回デプロイを含む） |
 | ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
 | 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）、ToDo追加・編集画面（`/todos/new`・`/todos/:id/edit`。期限・繰り返し・担当者/フォロー役の指定）、ToDo詳細画面（`/todos/:id`。内容表示・完了/未完了切り替え・編集/削除・コメントの追加/編集/削除）、家族グループ設定画面（`/family/settings`。メンバー管理・招待コード再発行・退出・作成者による削除）、個人設定画面（`/settings`。表示名・通知種別・期限の基準時刻・Push通知の端末状態・ログアウト）、iOSインストール案内（ToDo一覧・家族グループ作成/参加画面の上部に重ねて表示するバナーとDrawer。ホーム画面未追加のiOS Safariでのみ表示し、閉じた日時は端末の`localStorage`で7日間管理）。ログイン画面はユーザー提供の画像で再実装済み（PC/スマホで背景写真を出し分け）。他7画面はローカルD1へのセッション直接投入（実際のGoogleアカウントは未使用）でブラウザ確認済み、ユーザー承認済み → [`ローカルD1へのセッション投入によるUI確認.md`](notes/ローカルD1へのセッション投入によるUI確認.md)。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信・実機iPhoneでのバナー表示は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) [履歴](history/2026-09.md#2026-09-01-todo追加編集機能を実装) [履歴](history/2026-09.md#2026-09-01-todo詳細機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ設定機能を実装) [履歴](history/2026-09.md#2026-09-01-個人設定機能を実装) [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装) [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認) |
-| 本番 | 未構築 |
+| 本番 | 構築済み。Frontend https://family-todo-frontend.koekoe-app.workers.dev ・Backend https://family-todo-backend.koekoe-app.workers.dev （どちらもCloudflare Workers）。D1（`family-todo-db`）はマイグレーション3件適用済み。`main`へのマージで自動デプロイされる。Googleログインの認可画面までは到達を確認済みで、実アカウントでのログイン完走は未確認。Google OAuthは「テスト中」ステータスのため、ログインする人はテストユーザーへの登録が必要 → [`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md) |
 | 要件定義書 | 未決事項8件を含めて確定済み → [`docs/specs/01_requirements/family-todo/`](../specs/01_requirements/family-todo/README.md) |
 | 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み）。インフラ関連の技術検証3件も完了（Express・Web Push とも動作確認済み、通知の定期実行は15分おきに確定） → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |
 | 詳細設計 | 繰り返しToDoの期限計算・通知バッチ処理・ログインセッション管理の3件を作成済み。招待コード・作成者引き継ぎ・Push購読の登録失効は基本設計で十分と判断し作成していない → [`docs/specs/03_detail-design/`](../specs/03_detail-design/README.md) |

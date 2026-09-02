@@ -8,7 +8,7 @@
 - **認証**: Googleログイン（OAuth）
 - **通知**: Web Push（VAPID）
 
-pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。機能は8画面中7画面まで実装が進んだ段階で、残りの画面は順次実装していく。
+pnpm workspace のモノレポ構成（`apps/frontend` / `apps/backend` / `packages/shared`）。8画面すべての実装・単体テスト・結合テストが完了し、Cloudflare へデプロイ済み（下記「本番デプロイ」）。
 
 このリポジトリは **Claude Code / Codex / GitHub Copilot のどれを使っても、同じ開発方針・ルール・スキルを共有できる**ように作られています。詳しくは「AIエージェントによる開発」を参照。
 
@@ -120,7 +120,9 @@ pnpm test:e2e         # Playwright（画面操作）
 
 ## CI（GitHub Actions）
 
-`.github/workflows/ci.yml` で、PR・`main` への push のたびに次を実行する（`*.md` / `docs/` のみの変更は起動しない）。
+`.github/workflows/ci.yml` に 2 つのジョブがある（`*.md` / `docs/` のみの変更では起動しない）。
+
+**verify**（PR・`main` への push のたび）
 
 1. `pnpm install --frozen-lockfile`
 2. `pnpm lint`
@@ -129,9 +131,35 @@ pnpm test:e2e         # Playwright（画面操作）
 5. `pnpm test`
 6. `pnpm build`
 
+**deploy**（verify 成功後。`main` への push、または Actions タブの「Run workflow」による手動実行のとき）
+
+1. D1 のマイグレーション適用（未適用分のみ）
+2. Backend の秘密情報を Cloudflare へ反映
+3. Backend をデプロイ
+4. Frontend をデプロイ
+
 ## 本番デプロイ
 
-未着手。デプロイ先は Cloudflare。Backend は Cloudflare Workers 上で Express を動かす方式で確定（技術検証・環境構築で動作確認済み）。Frontend の具体的なデプロイ方式（Pages / Workers Static Assets 等）は未定。詳細は [`docs/todo/TODO.md`](docs/todo/TODO.md) を参照。
+`main` へマージすると自動でデプロイされる。
+
+| | URL |
+| --- | --- |
+| Frontend | https://family-todo-frontend.koekoe-app.workers.dev |
+| Backend | https://family-todo-backend.koekoe-app.workers.dev |
+
+どちらも Cloudflare Workers 上で動く。Frontend は [OpenNext](https://opennext.js.org/cloudflare)（`@opennextjs/cloudflare`）で Next.js を Workers 向けに変換している。DB は Cloudflare D1。
+
+設定値は 3 か所に分かれている。**このリポジトリは公開設定のため、この使い分けを崩さないこと。**
+
+| 置き場所 | 入れるもの |
+| --- | --- |
+| `wrangler.jsonc` の `vars` | 公開されても問題ない値（Google クライアント ID・各 URL・VAPID 公開鍵） |
+| ワークフローの `env` | ビルド時に JavaScript へ埋め込まれる値（`NEXT_PUBLIC_` で始まるもの） |
+| GitHub Secrets | 秘密の値（`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` / `GOOGLE_CLIENT_SECRET` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`） |
+
+本番リソースの一覧・設定手順・踏んだ落とし穴は [`docs/todo/notes/cloudflare本番デプロイ.md`](docs/todo/notes/cloudflare本番デプロイ.md) にまとめている。
+
+> **注意**: Google ログインは「テスト中」ステータスのため、ログインする人の Google アカウントを [Google Auth Platform](https://console.cloud.google.com/auth/audience) の「テストユーザー」へ事前に追加する必要がある。
 
 ## ライセンス
 
