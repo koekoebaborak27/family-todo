@@ -39,7 +39,7 @@ CI/CDの構築とCloudflareへの初回デプロイが完了し、本番が動�
 
 本番での動作確認（実Googleアカウントでのログイン → 家族グループ作成 → ToDo追加）と、通知バッチ本体の実装も完了した。**コードとして残っている宿題は無い。**
 
-次の宿題は2つとも設定作業。(1) **本番の実機で通知が届くかの確認**（期限が近いToDoを作り、担当者の個人設定で「期限が近づいたとき」をONにして、次のCron実行を15分以内待つ）。(2) 家族が使い始めるには、その人のGoogleアカウントを[Google Auth Platform](https://console.cloud.google.com/auth/audience)の「テストユーザー」へ追加する必要がある（[手順](notes/cloudflare本番デプロイ.md#2026-09-02-家族にログインしてもらうためのテストユーザー登録手順)）。
+次の宿題は、本番の実機でPush通知が届くかの確認。期限が近いToDoを作り、担当者の個人設定で「期限が近づいたとき」をONにして、次のCron実行を15分以内待つ。
 
 - [x] 1. [要件定義書](../specs/01_requirements/family-todo/01_家族todo共有アプリ.md)の「17. 未決事項」を確定させた（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-要件定義の未決事項8件を確定)
 - [x] 2. 基本設計（画面遷移・API仕様・DBスキーマ概要）とデザイントークンを決定した（2026-08-31）→ [履歴](history/2026-08.md#2026-08-31-基本設計画面遷移api仕様dbスキーマ概要とデザイントークンを決定)
@@ -92,7 +92,7 @@ CI/CDの構築とCloudflareへの初回デプロイが完了し、本番が動�
 - [x] 本番環境で動作確認する（実Googleアカウントでのログイン・家族グループ作成・ToDo追加まで確認）（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-cicdを構築しcloudflareへ初回デプロイ)
 - [x] 通知バッチ本体を実装する（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-通知バッチ本体を実装)
 - [ ] 本番の実機でPush通知が届くことを確認する（期限が近いToDoを作り、担当者の個人設定で「期限が近づいたとき」をONにして、次のCron実行を15分以内待つ）
-- [ ] 家族のGoogleアカウントを[Google Auth Platform](https://console.cloud.google.com/auth/audience)の「テストユーザー」へ追加する（使ってもらうために必要。コード作業は無い）→ [手順](notes/cloudflare本番デプロイ.md#2026-09-02-家族にログインしてもらうためのテストユーザー登録手順)
+- [x] 家族のGoogleアカウントを[Google Auth Platform](https://console.cloud.google.com/auth/audience)の「テストユーザー」へ追加する（2026-09-02）→ [履歴](history/2026-09.md#2026-09-02-pwaホーム画面アイコンを変更し家族をテストユーザーへ登録)
 - [ ] 独自ドメインを取得し、Google OAuthを本番公開する（任意。テストユーザー登録を不要にしたくなったら着手する。要件は[`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md)）
 
 ## 現在の状態
@@ -105,7 +105,7 @@ CI/CDの構築とCloudflareへの初回デプロイが完了し、本番が動�
 | ローカル環境 | 構築済み（pnpm workspace: `apps/frontend` + `apps/backend` + `packages/shared`）。`pnpm install` → `pnpm dev:backend` / `pnpm dev:frontend` で起動確認済み → [`README.md`](../../README.md)「セットアップ」。D1マイグレーション3件（`users`・`sessions`・`notification_settings`、`families`、`categories`・`todos`・`todo_assignees`・`unregistered_members`・`comments`・`push_subscriptions`）適用済み → [`apps/backend/migrations/`](../../apps/backend/migrations/README.md) |
 | 実装済みの画面 | ログイン画面（Google OAuthログイン・セッション発行）、家族グループ作成・参加画面（`POST /families` / `POST /families/join`、招待リンク`/join?code=`の振り分け）、ToDo一覧画面（`/todos`。完了状態タブ・並び順タブ/プルダウン・カテゴリ絞り込み・完了/未完了の切り替え・Push通知許可リクエスト）、ToDo追加・編集画面（`/todos/new`・`/todos/:id/edit`。期限・繰り返し・担当者/フォロー役の指定）、ToDo詳細画面（`/todos/:id`。内容表示・完了/未完了切り替え・編集/削除・コメントの追加/編集/削除）、家族グループ設定画面（`/family/settings`。メンバー管理・招待コード再発行・退出・作成者による削除）、個人設定画面（`/settings`。表示名・通知種別・期限の基準時刻・Push通知の端末状態・ログアウト）、iOSインストール案内（ToDo一覧・家族グループ作成/参加画面の上部に重ねて表示するバナーとDrawer。ホーム画面未追加のiOS Safariでのみ表示し、閉じた日時は端末の`localStorage`で7日間管理）。ログイン画面はユーザー提供の画像で再実装済み（PC/スマホで背景写真を出し分け）。他7画面はローカルD1へのセッション直接投入（実際のGoogleアカウントは未使用）でブラウザ確認済み、ユーザー承認済み → [`ローカルD1へのセッション投入によるUI確認.md`](notes/ローカルD1へのセッション投入によるUI確認.md)。実際のGoogleアカウントでの認可コードフロー完走・招待リンク経由の未ログイン時引き継ぎ・実機でのPush通知受信・実機iPhoneでのバナー表示は実機ブラウザでは未検証 → [履歴](history/2026-09.md#2026-09-01-ログイン機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ作成参加機能を実装) [履歴](history/2026-09.md#2026-09-01-todo一覧機能を実装) [履歴](history/2026-09.md#2026-09-01-todo追加編集機能を実装) [履歴](history/2026-09.md#2026-09-01-todo詳細機能を実装) [履歴](history/2026-09.md#2026-09-01-家族グループ設定機能を実装) [履歴](history/2026-09.md#2026-09-01-個人設定機能を実装) [履歴](history/2026-09.md#2026-09-01-iosインストール案内機能を実装) [履歴](history/2026-09.md#2026-09-01-ui見直しログイン画面の再実装と7画面の確認) |
 | 通知バッチ | 実装済み（`apps/backend/src/modules/notification/`）。15分おきのCronから期限接近・期限超過のWeb Pushを送る。本番の実機で通知が届くかは未確認 → [履歴](history/2026-09.md#2026-09-02-通知バッチ本体を実装) |
-| 本番 | 構築済み。Frontend https://family-todo-frontend.koekoe-app.workers.dev ・Backend https://family-todo-backend.koekoe-app.workers.dev （どちらもCloudflare Workers）。D1（`family-todo-db`）はマイグレーション3件適用済み。`main`へのマージで自動デプロイされる。実Googleアカウントでのログイン・家族グループ作成・ToDo追加まで動作確認済み。Google OAuthは「テスト中」ステータスのため、ログインする人はテストユーザーへの登録が必要（家族分は未登録） → [`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md) |
+| 本番 | 構築済み。Frontend https://family-todo-frontend.koekoe-app.workers.dev ・Backend https://family-todo-backend.koekoe-app.workers.dev （どちらもCloudflare Workers）。D1（`family-todo-db`）はマイグレーション3件適用済み。`main`へのマージで自動デプロイされる。実Googleアカウントでのログイン・家族グループ作成・ToDo追加まで動作確認済み。Google OAuthは「テスト中」ステータスで、家族のGoogleアカウントはテストユーザーに登録済み → [`cloudflare本番デプロイ.md`](notes/cloudflare本番デプロイ.md) |
 | 要件定義書 | 未決事項8件を含めて確定済み → [`docs/specs/01_requirements/family-todo/`](../specs/01_requirements/family-todo/README.md) |
 | 基本設計 | 画面遷移図・DBスキーマ・API仕様の概要と、8画面の画面別基本設計書を作成済み（SVG生成済み）。インフラ関連の技術検証3件も完了（Express・Web Push とも動作確認済み、通知の定期実行は15分おきに確定） → [`docs/specs/02_basic-design/`](../specs/02_basic-design/README.md) |
 | 詳細設計 | 繰り返しToDoの期限計算・通知バッチ処理・ログインセッション管理の3件を作成済み。招待コード・作成者引き継ぎ・Push購読の登録失効は基本設計で十分と判断し作成していない → [`docs/specs/03_detail-design/`](../specs/03_detail-design/README.md) |
