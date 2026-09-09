@@ -33,6 +33,8 @@ export function calculateNextDueAt(
     const weekdays =
       recurrenceConfig && "weekdays" in recurrenceConfig ? recurrenceConfig.weekdays : [];
     const currentWeekday = jstDate.getUTCDay();
+    // 選択した曜日のうち、今日より後に来る曜日までの日数だけを候補にし、
+    // 一番近いものを選ぶ。今週に該当日が無ければ翌週の同じ曜日（7日後）にする。
     const diffsAfter = weekdays
       .map((weekday) => (weekday - currentWeekday + 7) % 7)
       .filter((diff) => diff > 0);
@@ -42,6 +44,8 @@ export function calculateNextDueAt(
     const day = recurrenceConfig && "day" in recurrenceConfig ? recurrenceConfig.day : 1;
     const targetYear = jstDate.getUTCFullYear();
     const targetMonth = jstDate.getUTCMonth() + 1; // 翌月（JSの月またぎはDate.UTCが自動で正規化する）
+    // 翌月の末日を求め、指定日がそれを超える場合（例: 31日指定で翌月が30日まで）は
+    // 末日に切り詰める。
     const lastDayOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
     jstDate.setUTCFullYear(targetYear, targetMonth, Math.min(day, lastDayOfTargetMonth));
   }

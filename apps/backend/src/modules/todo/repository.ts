@@ -313,6 +313,7 @@ export async function findTodoFamilyId(todoId: number): Promise<number | null> {
   return row?.family_id ?? null;
 }
 
+// ToDoを完了済みにする（繰り返しなしの場合。繰り返しありはadvanceTodoDueDateを使う）。
 export async function markTodoCompleted(todoId: number, userId: number): Promise<void> {
   await getDb()
     .prepare(

@@ -259,6 +259,7 @@ export async function completeTodo(
   return { recurring: true, nextDueAt };
 }
 
+// 完了済みのToDoを未完了へ戻す。
 export async function incompleteTodo(todoId: number, user: AuthenticatedUser): Promise<void> {
   const familyId = ensureFamilyMembership(user);
   await ensureTodoInMyFamily(todoId, familyId);
