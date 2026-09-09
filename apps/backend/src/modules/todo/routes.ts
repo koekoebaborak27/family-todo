@@ -95,6 +95,7 @@ todoRouter.put("/todos/:id/assignees", async (req, res) => {
   res.status(204).end();
 });
 
+// ToDoを完了にする。繰り返し設定があれば完了にせず、期限を次回へ進めた結果を返す。
 todoRouter.post("/todos/:id/complete", async (req, res) => {
   const todoId = parseTodoId(req.params.id);
   const { user } = res.locals.authContext as AuthContext;
@@ -102,6 +103,7 @@ todoRouter.post("/todos/:id/complete", async (req, res) => {
   res.status(200).json(result);
 });
 
+// 完了済みのToDoを未完了へ戻す。
 todoRouter.post("/todos/:id/incomplete", async (req, res) => {
   const todoId = parseTodoId(req.params.id);
   const { user } = res.locals.authContext as AuthContext;
